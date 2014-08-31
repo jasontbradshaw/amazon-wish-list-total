@@ -17,5 +17,9 @@
       "run_at": "document_idle",
       "all_frames": true
     }
-  ]
+  ],
+
+  "icons": {
+    "512": "icon/icon.png"
+  }
 }
