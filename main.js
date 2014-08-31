@@ -74,7 +74,12 @@ var parseItems = function ($items) {
   // turn the items jQuery object into an array of parsed items
   var items = [];
   if ($items) {
-    $items.each(function () { return items.push(parseItem($(this))); });
+    $items.each(function () {
+      // skip removed items
+      if ($(this).is(':not(.g-item-sortable-removed)')) {
+        items.push(parseItem($(this)));
+      }
+    });
   }
 
   // the total number of needed items, taking quantity into account
