@@ -79,7 +79,9 @@ var parseItems = function ($items) {
 
   // the total number of needed items, taking quantity into account
   items.total_count = items.reduce(function (count, cur) {
-    return count + cur.need;
+    // only count items that we found a price for, i.e. that were available on
+    // Amazon and not just from other retailers.
+    return count + (cur.price ? cur.need : 0);
   }, 0);
 
   // the total price of all the items, taking the quantity into account
