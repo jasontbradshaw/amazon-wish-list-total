@@ -103,7 +103,6 @@ var onItemChange = function (callback) {
     // call the callback with the parsed array when the items count changes
     var items = getParsedItems();
     if (items.length !== lastCount) {
-      console.log('CHANGE');
       lastCount = items.length;
       callback.call(null, items);
     }
