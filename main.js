@@ -2,7 +2,7 @@ var $ = window.$;
 var accounting = window.accounting;
 
 var ITEMS_SELECTOR_FULL = '.g-items-section > [data-itemid]';
-var ITEMS_SELECTOR_COMPACT = '.g-compact-items tr + tr';
+var ITEMS_SELECTOR_COMPACT = '.g-compact-items tr + tr'; // skip the header
 var PRICE_PARENT_SELECTOR = '.top-nav-container .profile.a-declarative.top .profile-layout-aid-top';
 
 // if the selector finds things, returns a jQuery object, otherwise null. can
@@ -88,49 +88,43 @@ var parseItems = function ($items) {
 // grabs all items, parses them, and returns the result
 var getParsedItems = function () { return parseItems(getItemElements()); };
 
-// wait for the wishlist items to appear, then call the callback with the jQuery
-// object containing them.
+// wait for the wishlist items to appear, then call the callback with the parsed
+// list of their attributes.
 var onItems = function (callback) {
-  // only wait if the URL contains "wishlist"
-  if (/\/wishlist\//g.test(window.location)) {
-    var delay = 100;
-    var maxDelay = 1000;
-    var backoff = 1.1;
+  var delay = 100;
+  var backoff = 1.1;
 
-    // the number of polls we need the count to be identical for and larger than
-    // zero before we assume we've got all the items we're going to get.
-    var initialSameCount = 3;
-    var sameCount = initialSameCount;
-    var lastCount = 0;
+  // the number of polls we need the count to be identical for and larger than
+  // zero before we assume we've got all the items we're going to get.
+  var initialSameCount = 3;
+  var sameCount = initialSameCount;
+  var lastCount = 0;
 
-    var wait = function () {
-      var items = getParsedItems();
+  var wait = function () {
+    var items = getParsedItems();
 
-      if (items.length > 0) {
-        if (sameCount <= 0) {
-          // call the callback with the parsed array
-          return callback.call(null, items);
-        } else if (items.length !== lastCount) {
-          // we got a different number of items, reset the 'same' count and keep
-          // waiting for it to settle down.
-          sameCount = initialSameCount;
-          lastCount = items.length;
-        } else {
-          // we got the same number of items, decrement the 'same' count
-          sameCount--;
-        }
+    if (items.length > 0) {
+      if (sameCount <= 0) {
+        // call the callback with the parsed array
+        return callback.call(null, items);
+      } else if (items.length !== lastCount) {
+        // we got a different number of items, reset the 'same' count and keep
+        // waiting for it to settle down.
+        sameCount = initialSameCount;
+        lastCount = items.length;
+      } else {
+        // we got the same number of items, decrement the 'same' count
+        sameCount--;
       }
+    }
 
-      // try again if we haven't waited too long already
-      if (delay < maxDelay) {
-        setTimeout(wait, delay);
-        delay = Math.round(delay * backoff);
-      }
-    };
+    // try again
+    setTimeout(wait, delay);
+    delay = Math.round(delay * backoff);
+  };
 
-    // start waiting!
-    wait();
-  }
+  // start waiting!
+  wait();
 };
 
 // builds and returns the HTML for the total price element
