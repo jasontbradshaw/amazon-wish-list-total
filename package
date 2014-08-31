@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+out='packaged.zip'
+zip -r9 "${out}" .
