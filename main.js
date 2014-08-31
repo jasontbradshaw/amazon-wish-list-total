@@ -3,7 +3,10 @@ var accounting = window.accounting;
 
 var ITEMS_SELECTOR_FULL = '.g-items-section > [data-itemid]';
 var ITEMS_SELECTOR_COMPACT = '.g-compact-items tr + tr'; // skip the header
-var PRICE_PARENT_SELECTOR = '.top-nav-container .profile.a-declarative.top .profile-layout-aid-top';
+var TOTAL_PARENT_SELECTOR = '.top-nav-container .profile.a-declarative.top .profile-layout-aid-top';
+var TOTAL_ID = 'wishlist-total';
+
+var ITEMS_POLL_INTERVAL = 50;
 
 // if the selector finds things, returns a jQuery object, otherwise null. can
 // supply a $scope element as the first argument, and that jQuery element will
@@ -70,7 +73,9 @@ var parseItem = function ($item) {
 var parseItems = function ($items) {
   // turn the items jQuery object into an array of parsed items
   var items = [];
-  $items.each(function () { return items.push(parseItem($(this))); });
+  if ($items) {
+    $items.each(function () { return items.push(parseItem($(this))); });
+  }
 
   // the total number of needed items, taking quantity into account
   items.total_count = items.reduce(function (count, cur) {
@@ -88,39 +93,23 @@ var parseItems = function ($items) {
 // grabs all items, parses them, and returns the result
 var getParsedItems = function () { return parseItems(getItemElements()); };
 
-// wait for the wishlist items to appear, then call the callback with the parsed
-// list of their attributes.
-var onItems = function (callback) {
-  var delay = 100;
-  var backoff = 1.1;
-
-  // the number of polls we need the count to be identical for and larger than
-  // zero before we assume we've got all the items we're going to get.
-  var initialSameCount = 3;
-  var sameCount = initialSameCount;
+// whenever the number of available items changes, call the given callback with
+// an array of their attributes.
+var onItemChange = function (callback) {
+  // the last count of items we got
   var lastCount = 0;
 
   var wait = function () {
+    // call the callback with the parsed array when the items count changes
     var items = getParsedItems();
-
-    if (items.length > 0) {
-      if (sameCount <= 0) {
-        // call the callback with the parsed array
-        return callback.call(null, items);
-      } else if (items.length !== lastCount) {
-        // we got a different number of items, reset the 'same' count and keep
-        // waiting for it to settle down.
-        sameCount = initialSameCount;
-        lastCount = items.length;
-      } else {
-        // we got the same number of items, decrement the 'same' count
-        sameCount--;
-      }
+    if (items.length !== lastCount) {
+      console.log('CHANGE');
+      lastCount = items.length;
+      callback.call(null, items);
     }
 
     // try again
-    setTimeout(wait, delay);
-    delay = Math.round(delay * backoff);
+    setTimeout(wait, ITEMS_POLL_INTERVAL);
   };
 
   // start waiting!
@@ -130,7 +119,7 @@ var onItems = function (callback) {
 // builds and returns the HTML for the total price element
 var tmplPriceElement = function (attrs) {
   return (
-    '<div id="wishlist-total">' +
+    '<div id="' + TOTAL_ID + '">' +
       '<span class="total-text">Subtotal (' + attrs.total_count + ' item' + (attrs.total_count === 1 ? '' : 's') + ')</span>: ' +
       '<span class="total-price a-color-price">' + accounting.formatMoney(attrs.total_price) + '</span>' +
     '</div>'
@@ -138,9 +127,10 @@ var tmplPriceElement = function (attrs) {
 };
 
 // run it!
-onItems(function (items) {
-  // add the total to the DOM
-  $(PRICE_PARENT_SELECTOR).append(tmplPriceElement({
+onItemChange(function (items) {
+  // add the total to the DOM, removing any existing total element
+  $('#' + TOTAL_ID).remove();
+  $(TOTAL_PARENT_SELECTOR).append(tmplPriceElement({
     total_count: items.total_count,
     total_price: items.total_price,
   }));
