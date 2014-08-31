@@ -65,6 +65,17 @@ var parseItem = function ($item) {
   };
 };
 
+// given a jQuery object of items, parses them into an array of parsed items
+var parseItems = function ($items) {
+  var items = [];
+  $items.each(function () { return items.push(parseItem($(this))); });
+  return items;
+};
+
+// grabs all items, parses them, and returns the result
+// TODO: use this to re-parse items on total click!
+var getParsedItems = function () { return parseItems(getItems()); };
+
 // wait for the wishlist items to appear, then call the callback with the jQuery
 // object containing them.
 var withItems = function (callback) {
@@ -85,11 +96,8 @@ var withItems = function (callback) {
 
       if ($items.length > 0) {
         if (sameCount <= 0) {
-          // parse the items into an array of JSON objects
-          var items = [];
-          $items.each(function () { return items.push(parseItem($(this))); });
-
           // call the callback with the parsed array
+          var items = parseItems($items);
           return callback.call(null, items);
         } else if ($items.length !== lastCount) {
           // we got a different number of items, reset the 'same' count and keep
