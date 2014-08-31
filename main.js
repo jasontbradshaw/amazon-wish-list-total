@@ -6,7 +6,7 @@ var ITEMS_SELECTOR_COMPACT = '.g-compact-items tr + tr'; // skip the header
 var TOTAL_PARENT_SELECTOR = '.top-nav-container .profile.a-declarative.top .profile-layout-aid-top';
 var TOTAL_ID = 'wishlist-total';
 
-var ITEMS_POLL_INTERVAL = 50;
+var ITEMS_POLL_INTERVAL = 500;
 
 // if the selector finds things, returns a jQuery object, otherwise null. can
 // supply a $scope element as the first argument, and that jQuery element will
