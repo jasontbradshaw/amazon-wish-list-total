@@ -7,7 +7,7 @@
 
   "content_scripts": [
     {
-      "matches": [ "*://*.amazon.com/*" ],
+      "matches": [ "*://*.amazon.com/*/wishlist/*" ],
       "js": [
         "bower_components/jquery/dist/jquery.js",
         "bower_components/accounting/accounting.js",
