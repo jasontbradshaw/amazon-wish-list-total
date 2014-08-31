@@ -32,7 +32,7 @@ var select = function ($scope) {
 var valOrText = function ($el) { return $el.val() || $el.text(); };
 
 // returns the items on the page, regardless of what view the wishlist is in
-var getItems = function () {
+var getItemElements = function () {
   // each returns either a jQuery object of the items, or null
   return select(ITEMS_SELECTOR_FULL, ITEMS_SELECTOR_COMPACT);
 };
@@ -65,20 +65,32 @@ var parseItem = function ($item) {
   };
 };
 
-// given a jQuery object of items, parses them into an array of parsed items
+// given a jQuery object of items, parses them into an array of parsed items.
+// also includes totals for count and price and stores them on the array object.
 var parseItems = function ($items) {
+  // turn the items jQuery object into an array of parsed items
   var items = [];
   $items.each(function () { return items.push(parseItem($(this))); });
+
+  // the total number of needed items, taking quantity into account
+  items.total_count = items.reduce(function (count, cur) {
+    return count + cur.need;
+  }, 0);
+
+  // the total price of all the items, taking the quantity into account
+  items.total_price = items.reduce(function (total, cur) {
+    return total + cur.total_price;
+  }, 0);
+
   return items;
 };
 
 // grabs all items, parses them, and returns the result
-// TODO: use this to re-parse items on total click!
-var getParsedItems = function () { return parseItems(getItems()); };
+var getParsedItems = function () { return parseItems(getItemElements()); };
 
 // wait for the wishlist items to appear, then call the callback with the jQuery
 // object containing them.
-var withItems = function (callback) {
+var onItems = function (callback) {
   // only wait if the URL contains "wishlist"
   if (/\/wishlist\//g.test(window.location)) {
     var delay = 100;
@@ -92,18 +104,17 @@ var withItems = function (callback) {
     var lastCount = 0;
 
     var wait = function () {
-      var $items = getItems();
+      var items = getParsedItems();
 
-      if ($items.length > 0) {
+      if (items.length > 0) {
         if (sameCount <= 0) {
           // call the callback with the parsed array
-          var items = parseItems($items);
           return callback.call(null, items);
-        } else if ($items.length !== lastCount) {
+        } else if (items.length !== lastCount) {
           // we got a different number of items, reset the 'same' count and keep
           // waiting for it to settle down.
           sameCount = initialSameCount;
-          lastCount = $items.length;
+          lastCount = items.length;
         } else {
           // we got the same number of items, decrement the 'same' count
           sameCount--;
@@ -122,24 +133,21 @@ var withItems = function (callback) {
   }
 };
 
-// run it!
-withItems(function (items) {
-  var totalCount = items.reduce(function (count, cur) {
-    return count + cur.need;
-  }, 0);
-
-  var totalPrice = items.reduce(function (total, cur) {
-    return total + cur.total_price;
-  }, 0);
-
-  // use the styles/format of the shopping cart total
-  var $total = $(
+// builds and returns the HTML for the total price element
+var tmplPriceElement = function (attrs) {
+  return (
     '<div id="wishlist-total">' +
-      '<span class="total-text">Subtotal (' + totalCount + ' item' + (totalCount === 1 ? '' : 's') + ')</span>: ' +
-      '<span class="total-price a-color-price">' + accounting.formatMoney(totalPrice) + '</span>' +
+      '<span class="total-text">Subtotal (' + attrs.total_count + ' item' + (attrs.total_count === 1 ? '' : 's') + ')</span>: ' +
+      '<span class="total-price a-color-price">' + accounting.formatMoney(attrs.total_price) + '</span>' +
     '</div>'
   );
+};
 
+// run it!
+onItems(function (items) {
   // add the total to the DOM
-  $total.appendTo($(PRICE_PARENT_SELECTOR));
+  $(PRICE_PARENT_SELECTOR).append(tmplPriceElement({
+    total_count: items.total_count,
+    total_price: items.total_price,
+  }));
 });
