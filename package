@@ -17,4 +17,5 @@ zip --exclude \
   'package' \
   'test*' \
   'tests*' \
+  'screenshots*' \
   -r9 "${out}" .
