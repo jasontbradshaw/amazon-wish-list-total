@@ -1,4 +1,20 @@
 #!/usr/bin/env sh
 
 out='packaged.zip'
-zip -r9 "${out}" .
+
+rm -f "${out}"
+
+zip --exclude \
+  '*.min.*' \
+  '*.xcf' \
+  '*.zip' \
+  '*LICENSE*' \
+  '*README*' \
+  '.git*' \
+  '*bower.json' \
+  'demo-resources/*' \
+  'license' \
+  'package' \
+  'test*' \
+  'tests*' \
+  -r9 "${out}" .
