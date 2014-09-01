@@ -49,6 +49,10 @@ var parseItem = function ($item) {
   var $have = select($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]') || $();
 
   var name = $name.text().trim();
+
+  // this also happens to deal nicely with parsing values that have a range,
+  // like '$29.95 - $33.95'. it just parses the first value, which is what we
+  // would do anyway.
   var price = accounting.parse($price.text().trim());
 
   // luckily, these show up even when not visible on the page!
