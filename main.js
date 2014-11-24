@@ -1,12 +1,24 @@
 var $ = window.$;
 var accounting = window.accounting;
 
+// config
+var POLL_INTERVAL = 500;
+
 var ITEMS_SELECTOR_FULL = '.g-items-section > [data-itemid]';
 var ITEMS_SELECTOR_COMPACT = '.g-compact-items tr + tr'; // skip the header
-var TOTAL_PARENT_SELECTOR = '.top-nav-container .profile.a-declarative.top .profile-layout-aid-top';
 var TOTAL_ID = 'wishlist-total';
 
-var ITEMS_POLL_INTERVAL = 500;
+var $totalParent = $('.top-nav-container .profile.a-declarative.top .profile-layout-aid-top');
+
+// builds and returns the HTML for the total price element
+var tmplPriceElement = function (attrs) {
+  return (
+    '<div id="' + TOTAL_ID + '">' +
+      '<span class="total-text">Subtotal (' + attrs.total_count + ' item' + (attrs.total_count === 1 ? '' : 's') + ')</span>: ' +
+      '<span class="total-price a-color-price">' + accounting.formatMoney(attrs.total_price) + '</span>' +
+    '</div>'
+  );
+};
 
 // if the selector finds things, returns a jQuery object, otherwise null. can
 // supply a $scope element as the first argument, and that jQuery element will
@@ -104,44 +116,20 @@ var parseItems = function ($items) {
 // grabs all items, parses them, and returns the result
 var getParsedItems = function () { return parseItems(getItemElements()); };
 
-// whenever the number of available items changes, call the given callback with
-// an array of their attributes.
-var onItemChange = function (callback) {
-  // the last count of items we got
-  var lastCount = 0;
+// check for new items continuously. this is the simplest way to be correct :(
+var lastTotal = null;
+setInterval(function () {
+  var items = getParsedItems();
 
-  var wait = function () {
-    // call the callback with the parsed array when the items count changes
-    var items = getParsedItems();
-    if (items.length !== lastCount) {
-      lastCount = items.length;
-      callback.call(null, items);
-    }
+  // if the total has changed, update the DOM
+  if (items.total_price !== lastTotal) {
+    lastTotal = items.total_price;
 
-    // try again
-    setTimeout(wait, ITEMS_POLL_INTERVAL);
-  };
-
-  // start waiting!
-  wait();
-};
-
-// builds and returns the HTML for the total price element
-var tmplPriceElement = function (attrs) {
-  return (
-    '<div id="' + TOTAL_ID + '">' +
-      '<span class="total-text">Subtotal (' + attrs.total_count + ' item' + (attrs.total_count === 1 ? '' : 's') + ')</span>: ' +
-      '<span class="total-price a-color-price">' + accounting.formatMoney(attrs.total_price) + '</span>' +
-    '</div>'
-  );
-};
-
-// run it!
-onItemChange(function (items) {
-  // add the total to the DOM, removing any existing total element
-  $('#' + TOTAL_ID).remove();
-  $(TOTAL_PARENT_SELECTOR).append(tmplPriceElement({
-    total_count: items.total_count,
-    total_price: items.total_price,
-  }));
-});
+    // add the total to the DOM, removing any existing total element
+    $('#' + TOTAL_ID).remove();
+    $totalParent.append(tmplPriceElement({
+      total_count: items.total_count,
+      total_price: items.total_price,
+    }));
+  }
+}, POLL_INTERVAL);
