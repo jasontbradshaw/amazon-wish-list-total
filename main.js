@@ -8,7 +8,9 @@ var ITEMS_SELECTOR_FULL = '.g-items-section > [data-itemid]';
 var ITEMS_SELECTOR_COMPACT = '.g-compact-items tr + tr'; // skip the header
 var TOTAL_ID = 'wishlist-total';
 
-var $totalParent = $('.top-nav-container .profile.a-declarative.top .profile-layout-aid-top');
+// insert a dummy total element that will be updated with new content later
+var $total = $('<div/>')
+    .insertAfter('.top-nav-container .g-profile-stable.clip-text:first');
 
 // builds and returns the HTML for the total price element
 var tmplPriceElement = function (attrs) {
@@ -124,10 +126,7 @@ setInterval(function () {
   // if the total has changed, update the DOM
   if (items.total_price !== lastTotal) {
     lastTotal = items.total_price;
-
-    // add the total to the DOM, removing any existing total element
-    $('#' + TOTAL_ID).remove();
-    $totalParent.append(tmplPriceElement({
+    $total.replaceWith(tmplPriceElement({
       total_count: items.total_count,
       total_price: items.total_price,
     }));

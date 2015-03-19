@@ -1,8 +1,13 @@
 #wishlist-total {
-  /* make sure the total doesn't disturb the layout */
+  /* make sure the total doesn't disturb the existing layout */
   height: 0;
 }
 
 #wishlist-total .total-text {
   font-style: italic;
+}
+
+/* this comes before the total, and needs to display above it, not beside it */
+.top-nav-container .g-profile-stable.clip-text:first-child {
+  display: block;
 }
