@@ -82,7 +82,7 @@ var parseItem = function ($item) {
     need: need,
 
     price: price,
-    total_price: need * price,
+    total_price: need * price
   };
 };
 
@@ -128,7 +128,7 @@ setInterval(function () {
     lastTotal = items.total_price;
     $total.replaceWith(tmplPriceElement({
       total_count: items.total_count,
-      total_price: items.total_price,
+      total_price: items.total_price
     }));
   }
 }, POLL_INTERVAL);
