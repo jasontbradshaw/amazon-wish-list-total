@@ -7,7 +7,23 @@
 
   "content_scripts": [
     {
-      "matches": [ "*://*.amazon.com/*/wishlist/*" ],
+      "matches": [
+        "*://*.amazon.cn/*/wishlist/*",
+        "*://*.z.cn/*/wishlist/*",
+        "*://*.amazon.in/*/wishlist/*",
+        "*://*.amazon.co.jp/*/wishlist/*",
+        "*://*.amazon.fr/*/wishlist/*",
+        "*://*.amazon.de/*/wishlist/*",
+        "*://*.amazon.it/*/wishlist/*",
+        "*://*.amazon.nl/*/wishlist/*",
+        "*://*.amazon.es/*/wishlist/*",
+        "*://*.amazon.co.uk/*/wishlist/*",
+        "*://*.amazon.ca/*/wishlist/*",
+        "*://*.amazon.com.mx/*/wishlist/*",
+        "*://*.amazon.com/*/wishlist/*",
+        "*://*.amazon.com.au/*/wishlist/*",
+        "*://*.amazon.com.br/*/wishlist/*"
+      ],
       "js": [
         "bower_components/jquery/dist/jquery.js",
         "bower_components/accounting/accounting.js",
