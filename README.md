@@ -23,6 +23,10 @@ prices), but this is untested.
 
 Changelog
 ----
+#### 1.1.1
+* Attempt to detect and use the regional currency symbol
+* Make wish list id and item detection more robust
+
 #### 1.1.0
 * Parses all pages of wish list items to show a complete total, not just a total
   for the current page!
