@@ -30,7 +30,7 @@
         "main.js"
       ],
       "css": [ "main.css" ],
-      "run_at": "document_idle",
+      "run_at": "document_end",
       "all_frames": true
     }
   ],
