@@ -23,6 +23,9 @@ prices), but this is untested.
 
 Changelog
 ----
+#### 1.2.0
+* Use the "Used & New" price for unavailable items
+
 #### 1.1.1
 * Attempt to detect and use the regional currency symbol
 * Make wish list id and item detection more robust
@@ -31,10 +34,3 @@ Changelog
 * Parses all pages of wish list items to show a complete total, not just a total
   for the current page!
 * Enabled for use on amazon.co.uk, as well as all other regional variants
-
-Limitations
-----
-With enough demand, these could be implemented in the future, but here's what
-the extension _doesn't_ do:
-
-* Doesn't include items that aren't currently available on Amazon.com
