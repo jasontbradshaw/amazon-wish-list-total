@@ -22,7 +22,9 @@ var tmplPriceElement = function (attrs) {
   return (
     '<div id="' + ELEMENT_ID + '">' +
       '<span class="total-text">Subtotal (' + attrs.total_count + ' item' + (attrs.total_count === 1 ? '' : 's') + ')</span>: ' +
-      '<span class="total-price a-color-price">' + accounting.formatMoney(attrs.total_price) + '</span>' +
+      '<span class="total-price a-color-price">' +
+        accounting.formatMoney(attrs.total_price, attrs.currency_symbol) +
+      '</span>' +
     '</div>'
   );
 };
@@ -50,6 +52,13 @@ var select = function ($scope) {
 // returns either the value of the given element if possible, otherwise its text
 var valOrText = function ($el) { return $el.val() || $el.text(); };
 
+// given a string price, returns the most likely currency symbol it includes, or
+// null if none could be found.
+var parseCurrencySymbol = function (price) {
+  // strip numbers, words, spaces, and delimiters, hopefully leaving a symbol
+  return (price || '').replace(/(?:\s|\d|\.|\,)+/g, '');
+};
+
 // given a jQuery object for an item, parses it and returns JSON data for it
 var parseItem = function ($item) {
   // each item element has an id like "id_ASDFETC"
@@ -67,6 +76,7 @@ var parseItem = function ($item) {
   // like '$29.95 - $33.95'. it just parses the first value, which is what we
   // would do anyway.
   var price = accounting.parse($price.text().trim());
+  var currencySymbol = parseCurrencySymbol($price.text().trim());
 
   // luckily, these show up even when not visible on the page!
   var want = parseInt(valOrText($want), 10) || 1;
@@ -84,6 +94,7 @@ var parseItem = function ($item) {
   return {
     id: id,
     name: name,
+    currency_symbol: currencySymbol,
 
     counts: {
       have: have,
@@ -136,7 +147,14 @@ var calculateItemTotals = function (items) {
     return total + item.total_price;
   }, 0);
 
+  // find a valid currency symbol if one exists
+  var currencySymbol;
+  items.forEach(function (item) {
+    currencySymbol = currencySymbol || item.currency_symbol;
+  });
+
   return {
+    currency_symbol: currencySymbol || '',
     total_count: totalCount,
     total_price: totalPrice
   };
