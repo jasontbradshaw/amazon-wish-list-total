@@ -21,9 +21,9 @@ currencies (it uses
 [accounting.js](http://openexchangerates.github.io/accounting.js/) to parse the
 prices), but this is untested.
 
-Changes
+Changelog
 ----
-1.1.0
+#### 1.1.0
 * Parses all pages of wish list items to show a complete total, not just a total
   for the current page!
 * Enabled for use on amazon.co.uk, as well as all other regional variants
