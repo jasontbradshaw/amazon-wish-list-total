@@ -61,14 +61,17 @@ var parseCurrencySymbol = function (price) {
 
 // given a jQuery object for an item, parses it and returns JSON data for it
 var parseItem = function ($item) {
-  // each item element has an id like "id_ASDFETC"
+  // each item element hopefully has an id like "id_ASDFETC"
   var id = $item.attr('id').split('_')[1];
 
   var $name = select($item, '[id^="itemName_"]', '.g-title a:first') || $();
-  var $price = select($item, '[id^="itemPrice_"]') || $();
 
   var $want = select($item, '[id^="itemRequested_"]', '[name^="requestedQty"]') || $();
   var $have = select($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]') || $();
+
+  // if the item isn't available, attempt to use the "used and new" price
+  var $price = $item.find('[id^="itemPrice_"]');
+  if (!$price.text().trim()) { $price = $item.find('.itemUsedAndNewPrice'); }
 
   var name = $name.text().trim();
 
