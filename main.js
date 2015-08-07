@@ -2,9 +2,13 @@ var $ = window.$;
 var accounting = window.accounting;
 
 // config
-var ITEMS_SELECTOR = '.g-items-section > [data-itemid]';
-var WISH_LIST_ID = /\/wishlist\/(.+?)\//g.exec(window.location)[1];
+var ITEMS_SELECTOR = '.g-items-section [id^="item_"]';
 var ELEMENT_ID = 'wishlist-total';
+
+// the database of items we're currently displaying. this is used so we can poll
+// the current page for changes instead of having to scrape the entire list
+// constantly.
+var ITEMS = {};
 
 // add a loading message that will be replaced later with our parsed info
 $(
@@ -12,11 +16,6 @@ $(
     '<i>Calculating wish list total…</i>' +
   '</div>'
 ).insertAfter('.top-nav-container .g-profile-stable.clip-text:first');
-
-// the database of items we're currently displaying. this is used so we can poll
-// the current page for changes instead of having to scrape the entire list
-// constantly.
-var ITEMS = {};
 
 // builds and returns the HTML for the total price element
 var tmplPriceElement = function (attrs) {
@@ -26,6 +25,13 @@ var tmplPriceElement = function (attrs) {
       '<span class="total-price a-color-price">' + accounting.formatMoney(attrs.total_price) + '</span>' +
     '</div>'
   );
+};
+
+// finds the id of the currently-viewed wish list and returns it as a string
+var getCurrentWishListId = function () {
+  var $state = $('script[type="a-state"][data-a-state*="navState"]');
+  var json = JSON.parse($state.text());
+  return json.linkArgs.id;
 };
 
 // given a `$scope` jQuery element and some selectors, returns a jQuery object
@@ -46,7 +52,8 @@ var valOrText = function ($el) { return $el.val() || $el.text(); };
 
 // given a jQuery object for an item, parses it and returns JSON data for it
 var parseItem = function ($item) {
-  var id = $item.attr('data-itemid');
+  // each item element has an id like "id_ASDFETC"
+  var id = $item.attr('id').split('_')[1];
 
   var $name = select($item, '[id^="itemName_"]', '.g-title a:first') || $();
   var $price = select($item, '[id^="itemPrice_"]') || $();
@@ -68,7 +75,7 @@ var parseItem = function ($item) {
 
   // set all counts to zero if the item has been deleted. this means the totals
   // we get will be 0, meaning the item won't affect overall calculations.
-  if ($item.is('.g-item-sortable-removed')) {
+  if ($item.closest('.g-item-sortable-removed').length > 0) {
     want = 0;
     have = 0;
     need = 0;
@@ -94,7 +101,7 @@ var parseItem = function ($item) {
 var parsePage = function ($page) {
   // turn the items jQuery object into an array of parsed items
   var $items = select($page, ITEMS_SELECTOR);
-  var items = $items.map(function () {
+  var items = ($items || []).map(function () {
     // deleted items get parsed as having no price, which effectively deletes
     // them from the database (a useful thing so we don't have to do a real
     // delete).
@@ -206,6 +213,7 @@ var renderItemsFromDatabase = function () {
 
 // populate the items database with an initial full download. once we've
 // finished the initial download, start doing screen-scrape updates too.
+var WISH_LIST_ID = getCurrentWishListId();
 updateDatabaseFromAPI(WISH_LIST_ID, function () {
   // continuously check the current page for user changes to add to the database
   setInterval(function () {
