@@ -11,11 +11,11 @@ var ELEMENT_ID = 'wishlist-total';
 var ITEMS = {};
 
 // add a loading message that will be replaced later with our parsed info
-$(
+$('.profile-layout-aid-top:first').append(
   '<div id="' + ELEMENT_ID + '">' +
     '<i>Calculating wish list total…</i>' +
   '</div>'
-).insertAfter('.top-nav-container .g-profile-stable.clip-text:first');
+);
 
 // builds and returns the HTML for the total price element
 var tmplPriceElement = function (attrs) {
