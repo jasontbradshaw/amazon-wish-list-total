@@ -2,6 +2,7 @@ var $ = window.$;
 var accounting = window.accounting;
 
 // config
+var TOTAL_PARENT_SELECTOR = '.profile-layout-aid-top:first';
 var ITEMS_SELECTOR = '.g-items-section [id^="item_"]';
 var ELEMENT_ID = 'wishlist-total';
 
@@ -11,11 +12,17 @@ var ELEMENT_ID = 'wishlist-total';
 var ITEMS = {};
 
 // add a loading message that will be replaced later with our parsed info
-$('.profile-layout-aid-top:first').append(
+$(TOTAL_PARENT_SELECTOR).append(
   '<div id="' + ELEMENT_ID + '">' +
     '<i>Calculating wish list total…</i>' +
   '</div>'
 );
+
+// ensure we inserted our element, otherwise throw an error to alert to this
+if ($('#' + ELEMENT_ID).length === 0) {
+  throw new Error(
+      'Unable to append wish list to its parent element (selector `' + TOTAL_PARENT_SELECTOR + '`)');
+}
 
 // builds and returns the HTML for the total price element
 var tmplPriceElement = function (attrs) {
