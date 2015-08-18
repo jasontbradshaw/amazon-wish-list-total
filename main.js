@@ -214,6 +214,8 @@ var updateDatabaseFromItems = function (items) {
 // given a wish list id, downloads all its pages, parses the items, adds them to
 // the global database, then calls the given callback.
 var updateDatabaseFromAPI = function (id, callback) {
+  callback = callback || function () {};
+
   fetchWishListPages(id, function (pages) {
     var items = parseWishList(pages);
     updateDatabaseFromItems(items);
