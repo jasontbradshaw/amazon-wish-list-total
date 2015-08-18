@@ -15,11 +15,9 @@ to get that one magic number?
 Worry no more! This extension adds an unobtrusive total price below the wish
 list title, and updates it dynamically when items are added or deleted.
 
-It supports both the "normal" and "compact" views for wish lists, and skips
-totaling items that aren't currently available. It should also support multiple
-currencies (it uses
-[accounting.js](http://openexchangerates.github.io/accounting.js/) to parse the
-prices), but this is untested.
+It supports both the "normal" and "compact" views for wish lists, multiple
+currencies, and uses the "Used & New" price for items that aren't currently
+available!
 
 Changelog
 ----
