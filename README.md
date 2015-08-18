@@ -23,6 +23,9 @@ prices), but this is untested.
 
 Changelog
 ----
+#### 1.2.1
+* Update total element selector, warn when it's not found.
+
 #### 1.2.0
 * Use the "Used & New" price for unavailable items
 
