@@ -362,6 +362,9 @@ const updateDatabaseFromAPI = function (id, callback) {
   });
 };
 
+// Render all the items in the current database, assuming the totals have
+// changed since the last render.
+let PREVIOUS_HASH = null;
 const renderItemsFromDatabase = function () {
   // Collect all the items into a single list.
   const items = Object.keys(ITEMS).map(function (k) { return ITEMS[k]; });
@@ -369,8 +372,12 @@ const renderItemsFromDatabase = function () {
   // Render our items into the DOM, assuming it still exists!
   const totals = calculateItemTotals(items);
   const $el = $(`#${ELEMENT_ID}`)[0];
-  if ($el) {
+
+  // A simple hash to indicate when we need to re-render.
+  const currentHash = totals.total_count * 31 + totals.total_price * 7;
+  if ($el && currentHash !== PREVIOUS_HASH) {
     $el.parentElement.replaceChild(buildPriceElement(totals)[0], $el);
+    PREVIOUS_HASH = currentHash;
   }
 };
 
@@ -384,7 +391,7 @@ updateDatabaseFromAPI(WISH_LIST_ID, function () {
     const items = parsePage(document.documentElement);
     updateDatabaseFromItems(items);
     renderItemsFromDatabase();
-  }, 250);
+  }, 100);
 
   // Periodically do an update from the API in case other pages have changed.
   setInterval(function () {
