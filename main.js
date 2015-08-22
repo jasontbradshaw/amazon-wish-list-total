@@ -25,41 +25,143 @@ const $ = function (selectorOrElement, selector) {
   return Array.prototype.slice.call(el.querySelectorAll(selector));
 };
 
-// Domain name ending mapped to currency code, used to display the total amount
-// in the correct currency format.
-
-// The current locale, detected from the hostname.
+// Information about the current locale, including how to translate the
+// different text in the application.
 const LOCALE = (function () {
-  const data = {
-    '.ca': 'CAD',
-    '.cn': 'CNY',
-    '.co.jp': 'JPY',
-    '.co.uk': 'GBP',
-    '.com': 'USD',
-    '.com.au': 'AUD',
-    '.com.br': 'BRL',
-    '.com.mx': 'MXN',
-    '.de': 'EUR',
-    '.es': 'EUR',
-    '.fr': 'EUR',
-    '.ie': 'EUR',
-    '.in': 'ILS',
-    '.it': 'EUR',
-    '.nl': 'EUR',
+  const localizationData = {
+    '.ca': {
+      currency_code: 'CAD',
+      loading_text: 'Calculating wish list total…',
+      subtotal_text: function (n) {
+        return `Subtotal (${n} item${(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.cn': {
+      currency_code: 'CNY',
+      loading_text: '计算愿望清单总…',
+      subtotal_text: function (n) {
+        return `小计 (${n} 件商品)`;
+      },
+    },
+
+    '.co.jp': {
+      currency_code: 'JPY',
+      loading_text: 'ウィッシュリスト合計を計算…',
+      subtotal_text: function (n) {
+        return `小計 (${n} 商品)`;
+      },
+    },
+
+    '.co.uk': {
+      currency_code: 'GBP',
+      loading_text: 'Calculating wish list total…',
+      subtotal_text: function (n) {
+        return `Subtotal (${n} item${(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.com': {
+      currency_code: 'USD',
+      loading_text: 'Calculating wish list total…',
+      subtotal_text: function (n) {
+        return `Subtotal (${n} item${(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.com.au': {
+      currency_code: 'AUD',
+      loading_text: 'Calculating wish list total…',
+      subtotal_text: function (n) {
+        return `Subtotal (${n} item${(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.com.br': {
+      currency_code: 'BRL',
+      loading_text: 'Calculando lista de desejos total de…',
+      subtotal_text: function (n) {
+        return `Subtotal (${n} item${(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.com.mx': {
+      currency_code: 'MXN',
+      loading_text: 'Cálculo lista de artículos deseados total de…',
+      subtotal_text: function (n) {
+        return `Subtotal (${n} producto{(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.de': {
+      currency_code: 'EUR',
+      loading_text: 'Berechnung Wunschzettel insgesamt…',
+      subtotal_text: function (n) {
+        return `Summe (${n} Artikel)`;
+      },
+    },
+
+    '.es': {
+      currency_code: 'EUR',
+      loading_text: 'Cálculo lista de artículos deseados total de…',
+      subtotal_text: function (n) {
+        return `Subtotal (${n} producto${(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.fr': {
+      currency_code: 'EUR',
+      loading_text: 'Calcul liste de souhaits totale…',
+      subtotal_text: function (n) {
+        return `Sous-total (${n} article${(n === 1 ? '' : 's')}))`;
+      },
+    },
+
+    '.ie': {
+      currency_code: 'EUR',
+      loading_text: 'Calculating wish list total…',
+      subtotal_text: function (n) {
+        return `Subtotal (${n} item${(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.in': {
+      currency_code: 'ILS',
+      loading_text: 'Calculating wish list total…',
+      subtotal_text: function (n) {
+        return `Subtotal (item${(n === 1 ? '' : 's')})`;
+      },
+    },
+
+    '.it': {
+      currency_code: 'EUR',
+      loading_text: 'Calcolo lista dei desideri totale…',
+      subtotal_text: function (n) {
+        return `Totale provvisorio (${n} articol${(n === 1 ? 'o' : 'i')})`;
+      },
+    },
+
+    '.nl': {
+      currency_code: 'EUR',
+      loading_text: 'Berekenen wens lijst totaal…',
+      subtotal_text: function (n) {
+        return `Summe (${n} Artikel)`;
+      },
+    },
   };
 
-  // Return the first currency code that matches our domain.
-  for (const ending in data) {
-    if (Object.prototype.hasOwnProperty.call(data, ending)) {
+  // Return the first localization data that matches our domain ending.
+  for (const ending in localizationData) {
+    if (Object.prototype.hasOwnProperty.call(localizationData, ending)) {
       const matcher = new RegExp(`${ending.replace(/\./g, '[.]')}$`);
       if (matcher.test(window.location.hostname)) {
-        return data[ending];
+        return localizationData[ending];
       }
     }
   }
 
-  // If we didn't find anything, at least return _something_...
-  return 'USD';
+  // Default to USA, for lack of a better option.
+  return localizationData['.com'];
 }());
 
 // Given a `$scope` DOM element and some selectors, returns an array of DOM
@@ -115,26 +217,20 @@ const buildPriceElement = function (attrs) {
   if (attrs.loading) {
     return DOM`
       <div id="${ELEMENT_ID}">
-        <i>Calculating wish list total…</i>
+        <i>${LOCALE.loading_text}</i>
       </div>
     `;
   } else {
-    const itemsPlural = `item${(attrs.total_count === 1 ? '' : 's')}`;
-
-    // TODO: Use the built-in currenct formatting, as detected from the symbol!
+    // Format the total price as the locale dictates.
     const localeTotal = attrs.total_price.toLocaleString(undefined, {
       style: 'currency',
-      currency: LOCALE,
+      currency: LOCALE.currency_code,
       currencyDisplay: 'symbol',
-
-      // Always show two fraction digits since we're showing currency.
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
     });
 
     return DOM`
       <div id="${ELEMENT_ID}">
-        <span class="total-text">Subtotal (${attrs.total_count || '0'} ${itemsPlural})</span>:
+        <span class="total-text">${LOCALE.subtotal_text(attrs.total_count)}</span>:
         <span class="total-price a-color-price">
           ${localeTotal}
         </span>
