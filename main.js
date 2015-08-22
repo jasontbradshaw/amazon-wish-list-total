@@ -42,15 +42,38 @@ const closest = function ($el, selector) {
   return $current || null;
 };
 
+// A tagged template function for building a DOM element. Returns an array of
+// constructed DOM elements, possibly containing only a single item if only a
+// single item was specified in the string.
+const DOM = function (strings) {
+  const values = Array.prototype.slice.call(arguments, 1);
+  strings = Array.prototype.slice.call(strings);
+
+  const parts = [];
+  while (strings.length > 0 || values.length > 0) {
+    const nextString = strings.shift();
+    const nextValue = values.shift();
+
+    if (nextString) { parts.push(nextString); }
+    if (nextValue) { parts.push(nextValue); }
+  }
+
+  const el = document.createElement('div');
+  el.innerHTML = parts.join('').trim();
+
+  return Array.prototype.slice.call(el.childNodes);
+};
+
 // Build and return a DOM element for our element.
 const buildPriceElement = function (attrs) {
   attrs = attrs || {};
 
-  const el = document.createElement('div');
-  el.id = ELEMENT_ID;
-
   if (attrs.loading) {
-    el.innerHTML = '<i>Calculating wish list total…</i>';
+    return DOM`
+      <div id="${ELEMENT_ID}">
+        <i>Calculating wish list total…</i>
+      </div>
+    `;
   } else {
     const itemsPlural = `item${(attrs.total_count === 1 ? '' : 's')}`;
 
@@ -61,15 +84,17 @@ const buildPriceElement = function (attrs) {
       maximumFractionDigits: 2,
     });
 
-    el.innerHTML = `
-      <span class="total-text">Subtotal ${attrs.total_count} ${itemsPlural})</span>:
-      <span class="total-price a-color-price">
-        ${attrs.currency_symbol}${localeTotal}
-      </span>
+    return DOM`
+      <div id="${ELEMENT_ID}">
+        <span class="total-text">
+          Subtotal (${attrs.total_count} ${itemsPlural})
+        </span>:
+        <span class="total-price a-color-price">
+          ${attrs.currency_symbol}${localeTotal}
+        </span>
+      </div>
     `;
   }
-
-  return el;
 };
 
 // The database of items we're currently displaying. This is used so we can poll
@@ -78,7 +103,7 @@ const buildPriceElement = function (attrs) {
 const ITEMS = {};
 
 // Add a loading message that will be replaced later with our parsed info
-$(TOTAL_PARENT_SELECTOR)[0].appendChild(buildPriceElement({ loading: true }));
+$(TOTAL_PARENT_SELECTOR)[0].appendChild(buildPriceElement({ loading: true })[0]);
 
 // Finds the id of the currently-viewed wish list and returns it as a string.
 const getCurrentWishListId = function () {
@@ -291,7 +316,7 @@ const renderItemsFromDatabase = function () {
   const totals = calculateItemTotals(items);
   const $el = $(`#${ELEMENT_ID}`)[0];
   if ($el) {
-    $el.parentNode.replaceChild(buildPriceElement(totals), $el);
+    $el.parentElement.replaceChild(buildPriceElement(totals)[0], $el);
   }
 };
 
