@@ -15,14 +15,21 @@ to get that one magic number?
 Worry no more! This extension adds an unobtrusive total price below the wish
 list title, and updates it dynamically when items are added or deleted.
 
-It supports both the "normal" and "compact" views for wish lists, multiple
-currencies, and uses the "Used & New" price for items that aren't currently
-available!
-
 Changelog
 ----
+#### 1.3.0
+* Fix "Ship-to" address overlap
+* Fix total mouse selection (it's now possible!)
+* Use average price (instead of lowest price) when items have a price range
+* Handle "Unavailable" items
+* Improve currency parsing/detection
+* Handle wish lists that aren't on `/wishlist/` URLs
+* Re-render total element only when the wish list changes, not constantly
+* Make the extension _much_ smaller in size (17K v.s. 250K)
+* Re-write extension in ES6
+
 #### 1.2.1
-* Update total element selector, warn when it's not found.
+* Update total element selector, warn when it's not found
 
 #### 1.2.0
 * Use the "Used & New" price for unavailable items
