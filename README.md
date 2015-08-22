@@ -17,6 +17,9 @@ list title, and updates it dynamically when items are added or deleted.
 
 Changelog
 ----
+#### 1.4.0
+* Localize all text
+
 #### 1.3.0
 * Fix "Ship-to" address overlap
 * Fix total mouse selection (it's now possible!)
