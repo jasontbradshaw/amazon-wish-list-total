@@ -3,9 +3,16 @@
 // AJAX!
 const ajax = window.nanoajax.ajax;
 
-// Configuration options.
-const TOTAL_PARENT_SELECTOR = '.profile-layout-aid-top';
+// This is the element that either contains nothing of substance, _or_ contains
+// the "Ship-to" address. We append our element to this so that it always shows
+// up below either the wish list title _or_ the "Ship-to" address, if present.
+const TOTAL_PARENT_SELECTOR = '.profile.a-declarative.top .profile:last-child';
 const ELEMENT_ID = 'wishlist-total';
+
+// The database of items we're currently displaying. This is used so we can poll
+// the current page for changes instead of having to scrape the entire list
+// constantly.
+const ITEMS = {};
 
 // Select the given elements from the document and return them as an array.
 const $ = function (selectorOrElement, selector) {
@@ -127,9 +134,7 @@ const buildPriceElement = function (attrs) {
 
     return DOM`
       <div id="${ELEMENT_ID}">
-        <span class="total-text">
-          Subtotal (${attrs.total_count || '0'} ${itemsPlural})
-        </span>:
+        <span class="total-text">Subtotal (${attrs.total_count || '0'} ${itemsPlural})</span>:
         <span class="total-price a-color-price">
           ${localeTotal}
         </span>
@@ -137,14 +142,6 @@ const buildPriceElement = function (attrs) {
     `;
   }
 };
-
-// The database of items we're currently displaying. This is used so we can poll
-// the current page for changes instead of having to scrape the entire list
-// constantly.
-const ITEMS = {};
-
-// Add a loading message that will be replaced later with our parsed info
-$(TOTAL_PARENT_SELECTOR)[0].appendChild(buildPriceElement({ loading: true })[0]);
 
 // Finds the id of the currently-viewed wish list and returns it as a string.
 const getCurrentWishListId = function () {
@@ -380,6 +377,9 @@ const renderItemsFromDatabase = function () {
     PREVIOUS_HASH = currentHash;
   }
 };
+
+// Add a loading message that will be replaced later with our parsed info
+$(TOTAL_PARENT_SELECTOR)[0].appendChild(buildPriceElement({ loading: true })[0]);
 
 // Populate the items database with an initial full download. Once we've
 // finished the initial download, start doing screen-scrape updates too.

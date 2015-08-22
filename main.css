@@ -1,13 +1,11 @@
 #wishlist-total {
-  /* make sure the total doesn't disturb the existing layout */
+  /* Ensure the total doesn't disturb the existing layout. */
   height: 0;
+
+  /* Ensure the total comes _after_ the "Ship-to" address, if any. */
+  clear: both;
 }
 
 #wishlist-total .total-text {
   font-style: italic;
-}
-
-/* this comes before the total, and needs to display above it, not beside it */
-.top-nav-container .g-profile-stable.clip-text:first-child {
-  display: block;
 }
