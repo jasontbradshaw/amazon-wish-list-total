@@ -18,6 +18,43 @@ const $ = function (selectorOrElement, selector) {
   return Array.prototype.slice.call(el.querySelectorAll(selector));
 };
 
+// Domain name ending mapped to currency code, used to display the total amount
+// in the correct currency format.
+
+// The current locale, detected from the hostname.
+const LOCALE = (function () {
+  const data = {
+    '.ca': 'CAD',
+    '.cn': 'CNY',
+    '.co.jp': 'JPY',
+    '.co.uk': 'GBP',
+    '.com': 'USD',
+    '.com.au': 'AUD',
+    '.com.br': 'BRL',
+    '.com.mx': 'MXN',
+    '.de': 'EUR',
+    '.es': 'EUR',
+    '.fr': 'EUR',
+    '.ie': 'EUR',
+    '.in': 'ILS',
+    '.it': 'EUR',
+    '.nl': 'EUR',
+  };
+
+  // Return the first currency code that matches our domain.
+  for (const ending in data) {
+    if (Object.prototype.hasOwnProperty.call(data, ending)) {
+      const matcher = new RegExp(`${ending.replace(/\./g, '[.]')}$`);
+      if (matcher.test(window.location.hostname)) {
+        return data[ending];
+      }
+    }
+  }
+
+  // If we didn't find anything, at least return _something_...
+  return 'USD';
+}());
+
 // Given a `$scope` DOM element and some selectors, returns an array of DOM
 // nodes matching the first selector that finds something, otherwise an empty
 // array if no selectors find anything.
@@ -79,6 +116,10 @@ const buildPriceElement = function (attrs) {
 
     // TODO: Use the built-in currenct formatting, as detected from the symbol!
     const localeTotal = attrs.total_price.toLocaleString(undefined, {
+      style: 'currency',
+      currency: LOCALE,
+      currencyDisplay: 'symbol',
+
       // Always show two fraction digits since we're showing currency.
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -87,10 +128,10 @@ const buildPriceElement = function (attrs) {
     return DOM`
       <div id="${ELEMENT_ID}">
         <span class="total-text">
-          Subtotal (${attrs.total_count} ${itemsPlural})
+          Subtotal (${attrs.total_count || '0'} ${itemsPlural})
         </span>:
         <span class="total-price a-color-price">
-          ${attrs.currency_symbol}${localeTotal}
+          ${localeTotal}
         </span>
       </div>
     `;
@@ -121,22 +162,44 @@ const getCurrentWishListId = function () {
 // text.
 const valOrText = function ($el) { return $el.value || $el.innerText; };
 
-// Turns a currency string into a single floating point number. Parses only the
-// first value (as determined by whitespace separation) found in the string.
+// Turns a currency string into a single floating point number. If the number
+// has thousands separators _or_ uses commas instead of periods to separate the
+// fraction, we normalize the number to a decimal fraction first. If multiple
+// currency values are included in the string, an average of all of them is
+// returned.
 const parseCurrency = function (s) {
-  return parseFloat(
-    (s || '')
-    .trim()
-    .split(/\s/)[0]
-    .replace(/[^0-9.,]+/g, '')
-  , 10);
-};
+  // Pare down our string to include only digits, commas, periods, and single
+  // literal spaces instead of multiple whitespace characters.
+  s = (s || '')
+      .replace(/[^0-9.,\s]+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
 
-// Given a string price, returns the most likely currency symbol it includes, or
-// null if none could be found.
-const parseCurrencySymbol = function (price) {
-  // strip numbers, words, spaces, and delimiters, hopefully leaving a symbol
-  return (price || '').replace(/(?:\s|\d|\.|\,)+/g, '');
+  // Get all the possible numbers in the string.
+  const parts = s.split(/\s/g);
+
+  const values = parts.map(function (part) {
+    // Use the number's final non-digit character to detect whether it's
+    // formatted with periods (1,234.56) or commas (1.234,56).
+    const commaSeparated = part.replace(/[^.,]+/g, '').endsWith(',');
+
+    // If it's comma-separated, normalize it to a decimal number.
+    if (commaSeparated) {
+      // Turns '1.234,56' into '1234.56'.
+      const commaParts = part.split(',');
+      part = commaParts[0].replace(/\./g, '') + '.' + commaParts[1];
+    } else {
+      part = part.replace(/,/g, '');
+    }
+
+    // Turn our now-normalized value into a base-10 float.
+    return parseFloat(part, 10);
+  });
+
+  // Calculate and return the average of the parsed values.
+  return values.reduce(function (sum, value) {
+    return sum + value;
+  }, 0) / parts.length;
 };
 
 // Given a DOM node for an item, parses it and returns JSON data for it.
@@ -157,15 +220,14 @@ const parseItem = function ($item) {
   let itemName = '';
   if ($name.length > 0) { itemName = $name[0].innerText.trim(); }
 
-  // This will deal nicely with parsing values that have a range, like '$29.95 -
-  // $33.95' since it will parses out only the first value. Occasionally, items
-  // will become "Unavailable", in which case they can't contribute to the total
-  // list price and are set to a price of zero.
+  // This will deal nicely with parsing values that have a range, like "$29.95 -
+  // $33.95" since it will parses out only the first value. Occasionally, items
+  // will have a price of "Unavailable", in which case they can't contribute to the total
+  // list price and are set to a price of zero. If the price has no digits in it
+  // at all, we assume it's unavailable/broken and set its value to 0.
   let price = 0;
-  let currencySymbol = '';
-  if ($price[0] && $price[0].innerText.trim().toLowerCase() !== 'unavailable') {
+  if ($price[0] && /\d/.test($price[0].innerText)) {
     price = parseCurrency($price[0].innerText);
-    currencySymbol = parseCurrencySymbol($price[0].innerText);
   }
 
   // luckily, these show up even when not visible on the page!
@@ -188,7 +250,6 @@ const parseItem = function ($item) {
   return {
     id: id,
     name: itemName,
-    currency_symbol: currencySymbol,
 
     counts: {
       have: have,
@@ -237,14 +298,7 @@ const calculateItemTotals = function (items) {
     return total + item.total_price;
   }, 0);
 
-  // find a valid currency symbol if one exists
-  let currencySymbol;
-  items.forEach(function (item) {
-    currencySymbol = currencySymbol || item.currency_symbol;
-  });
-
   return {
-    currency_symbol: currencySymbol || '',
     total_count: totalCount,
     total_price: totalPrice,
   };
