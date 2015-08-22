@@ -21,8 +21,15 @@ available!
 
 Changelog
 ----
+#### 1.3.0
+* Fix "Ship-to" address overlap
+* Improve currency parsing/detection
+* Use average price (instead of lowest price) when items have a price range
+* Handle "Unavailable" items
+* Handle wish lists that aren't on `/wishlist/` URLs
+
 #### 1.2.1
-* Update total element selector, warn when it's not found.
+* Update total element selector, warn when it's not found
 
 #### 1.2.0
 * Use the "Used & New" price for unavailable items
