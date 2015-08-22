@@ -8,7 +8,6 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "jquery": "~2.1.4",
-    "accounting": "~0.3.2"
+    "nanoajax": "~0.3.1"
   }
 }
