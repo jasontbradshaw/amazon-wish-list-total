@@ -8,21 +8,21 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.amazon.cn/*/wishlist/*",
-        "*://*.z.cn/*/wishlist/*",
-        "*://*.amazon.in/*/wishlist/*",
-        "*://*.amazon.co.jp/*/wishlist/*",
-        "*://*.amazon.fr/*/wishlist/*",
-        "*://*.amazon.de/*/wishlist/*",
-        "*://*.amazon.it/*/wishlist/*",
-        "*://*.amazon.nl/*/wishlist/*",
-        "*://*.amazon.es/*/wishlist/*",
-        "*://*.amazon.co.uk/*/wishlist/*",
-        "*://*.amazon.ca/*/wishlist/*",
-        "*://*.amazon.com.mx/*/wishlist/*",
-        "*://*.amazon.com/*/wishlist/*",
-        "*://*.amazon.com.au/*/wishlist/*",
-        "*://*.amazon.com.br/*/wishlist/*"
+        "*://*.amazon.cn/gp/registry/*",
+        "*://*.z.cn/gp/registry/*",
+        "*://*.amazon.in/gp/registry/*",
+        "*://*.amazon.co.jp/gp/registry/*",
+        "*://*.amazon.fr/gp/registry/*",
+        "*://*.amazon.de/gp/registry/*",
+        "*://*.amazon.it/gp/registry/*",
+        "*://*.amazon.nl/gp/registry/*",
+        "*://*.amazon.es/gp/registry/*",
+        "*://*.amazon.co.uk/gp/registry/*",
+        "*://*.amazon.ca/gp/registry/*",
+        "*://*.amazon.com.mx/gp/registry/*",
+        "*://*.amazon.com/gp/registry/*",
+        "*://*.amazon.com.au/gp/registry/*",
+        "*://*.amazon.com.br/gp/registry/*"
       ],
       "js": [
         "bower_components/nanoajax/nanoajax.min.js",

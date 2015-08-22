@@ -313,10 +313,10 @@ const fetchWishListPages = function (id, callback, pages) {
 
   console.log(`fetching wish list page ${pageNumber}...`);
 
-  // fetch the given page of results, parse them, and call the callback with
-  // them.
-  const url = window.location.pathname.split(id)[0] + id;
-  ajax(`${url}?page=${pageNumber}`, function (code, responseText) {
+  // Fetch the current page and add it to our list. When we're done fetching
+  // pages, call the callback with them.
+  const url = `/gp/registry/wishlist/${id}?page=${pageNumber}`;
+  ajax(url, function (code, responseText) {
     if (code >= 200 && code < 300) {
       // parse the downloaded data into a document and add it to our accumulated
       // pages list.
