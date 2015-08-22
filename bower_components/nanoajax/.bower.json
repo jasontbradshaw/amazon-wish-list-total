@@ -1,0 +1,27 @@
+{
+  "name": "nanoajax",
+  "main": "nanoajax.min.js",
+  "version": "0.3.1",
+  "homepage": "https://github.com/yanatan16/nanoajax",
+  "authors": [
+    "Jon Eisen <jon@joneisen.me>"
+  ],
+  "description": "An ajax library you need a microscope to see.",
+  "keywords": [
+    "ajax",
+    "nano",
+    "javascript",
+    "cross-browser"
+  ],
+  "license": "MIT",
+  "_release": "0.3.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.3.1",
+    "commit": "9feb562f22e236eca9b42cd7e21c384d3518d78c"
+  },
+  "_source": "git://github.com/yanatan16/nanoajax.git",
+  "_target": "~0.3.1",
+  "_originalSource": "nanoajax",
+  "_direct": true
+}
