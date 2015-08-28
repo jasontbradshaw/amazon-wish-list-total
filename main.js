@@ -6,7 +6,8 @@ const ajax = window.nanoajax.ajax;
 // This is the element that either contains nothing of substance, _or_ contains
 // the "Ship-to" address. We append our element to this so that it always shows
 // up below either the wish list title _or_ the "Ship-to" address, if present.
-const TOTAL_PARENT_SELECTOR = '.profile.a-declarative.top .profile:last-child';
+const SELECTOR = '.profile.a-declarative.top .profile:last-child';
+const FALLBACK_SELECTOR = '#wl-list-info';
 const ELEMENT_ID = 'wishlist-total';
 
 // The database of items we're currently displaying. This is used so we can poll
@@ -23,6 +24,19 @@ const $ = function (selectorOrElement, selector) {
   }
 
   return Array.prototype.slice.call(el.querySelectorAll(selector));
+};
+
+// Given a `$scope` DOM element and some selectors, returns an array of DOM
+// nodes matching the first selector that finds something, otherwise an empty
+// array if no selectors find anything.
+const $$ = function ($scope) {
+  let $items = [];
+  for (let i = 1; i < arguments.length; i++) {
+    $items = $($scope, arguments[i]);
+    if ($items.length > 0) { break; }
+  }
+
+  return $items;
 };
 
 // Information about the current locale, including how to translate the
@@ -163,19 +177,6 @@ const LOCALE = (function () {
   // Default to USA, for lack of a better option.
   return localizationData['.com'];
 }());
-
-// Given a `$scope` DOM element and some selectors, returns an array of DOM
-// nodes matching the first selector that finds something, otherwise an empty
-// array if no selectors find anything.
-const $$ = function ($scope) {
-  let $items = [];
-  for (let i = 1; i < arguments.length; i++) {
-    $items = $($scope, arguments[i]);
-    if ($items.length > 0) { break; }
-  }
-
-  return $items;
-};
 
 // Given an element and a selector, returns the closest matching parent node
 // (including the element itself), or `null` if none matches.
@@ -475,7 +476,8 @@ const renderItemsFromDatabase = function () {
 };
 
 // Add a loading message that will be replaced later with our parsed info
-$(TOTAL_PARENT_SELECTOR)[0].appendChild(buildPriceElement({ loading: true })[0]);
+$$(document.documentElement,
+  SELECTOR, FALLBACK_SELECTOR)[0].appendChild(buildPriceElement({ loading: true })[0]);
 
 // Populate the items database with an initial full download. Once we've
 // finished the initial download, start doing screen-scrape updates too.
