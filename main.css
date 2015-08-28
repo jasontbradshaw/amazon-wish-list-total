@@ -1,9 +1,28 @@
-#wishlist-total {
-  /* Ensure the total doesn't disturb the existing layout. */
-  height: 0;
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-  /* Ensure the total comes _after_ the "Ship-to" address, if any. */
-  clear: both;
+/* Used when the total is loading to prevent a jarring "pop" when it appears. */
+.animation-fade-in {
+  animation: fade-in 150ms;
+}
+
+#wishlist-total {
+  position: fixed;
+  bottom: 36px;
+  left: 36px;
+
+  float: left;
+
+  /* Make sure it's above most things, but _below_ the backdrops. */
+  z-index: 1000;
+
+  padding: 18px 27px;
+
+  font-size: 14px;
+  background-color: white;
+  border: 1px solid #dddddd;
 }
 
 #wishlist-total .total-text {

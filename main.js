@@ -6,8 +6,6 @@ const ajax = window.nanoajax.ajax;
 // This is the element that either contains nothing of substance, _or_ contains
 // the "Ship-to" address. We append our element to this so that it always shows
 // up below either the wish list title _or_ the "Ship-to" address, if present.
-const SELECTOR = '.profile.a-declarative.top .profile:last-child';
-const FALLBACK_SELECTOR = '#wl-list-info';
 const ELEMENT_ID = 'wishlist-total';
 
 // The database of items we're currently displaying. This is used so we can poll
@@ -217,7 +215,7 @@ const buildPriceElement = function (attrs) {
 
   if (attrs.loading) {
     return DOM`
-      <div id="${ELEMENT_ID}">
+      <div id="${ELEMENT_ID}" class="animation-fade-in">
         <i>${LOCALE.loading_text}</i>
       </div>
     `;
@@ -476,8 +474,7 @@ const renderItemsFromDatabase = function () {
 };
 
 // Add a loading message that will be replaced later with our parsed info
-$$(document.documentElement,
-  SELECTOR, FALLBACK_SELECTOR)[0].appendChild(buildPriceElement({ loading: true })[0]);
+$('body')[0].appendChild(buildPriceElement({ loading: true })[0]);
 
 // Populate the items database with an initial full download. Once we've
 // finished the initial download, start doing screen-scrape updates too.
