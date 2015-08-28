@@ -17,6 +17,9 @@ list title, and updates it dynamically when items are added or deleted.
 
 Changelog
 ----
+#### 1.4.1
+* Add fallback selector for when one of the preferred selectors isn't found
+
 #### 1.4.0
 * Localize all text
 
