@@ -2,7 +2,7 @@ amazon-wish-list-total
 =====================
 
 A Google Chrome extension that totals up the price of all items in the current
-Amazon wish list, and displays it unobtrusively below the wish list title.
+Amazon wish list, and displays it unobtrusively on the left side of the screen.
 
 ![Screenshot](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/screenshots/screenshot.png)
 
@@ -12,8 +12,8 @@ Ever get tired of having to manually total up the items in your wish list, click
 a button to figure out how much it all costs, or add all the items to the cart
 to get that one magic number?
 
-Worry no more! This extension adds an unobtrusive total price below the wish
-list title, and updates it dynamically when items are added or deleted.
+Worry no more! This extension adds an unobtrusive total price to the left side of
+the screen, and updates it dynamically when items are added or deleted.
 
 Changelog
 ----
