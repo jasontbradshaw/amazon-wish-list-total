@@ -1,3 +1,5 @@
+[![Chrome Web Store Badge](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/screenshots/badge.png)](https://chrome.google.com/webstore/detail/amazon-wish-list-total/boekbkconiendicldakeboooeilaldmh)
+
 amazon-wish-list-total
 =====================
 
@@ -5,8 +7,6 @@ A Google Chrome extension that totals up the price of all items in the current
 Amazon wish list, and displays it unobtrusively on the left side of the screen.
 
 ![Screenshot](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/screenshots/screenshot.png)
-
-Check it out on the [Chrome Web Store](https://chrome.google.com/webstore/detail/amazon-wish-list-total/boekbkconiendicldakeboooeilaldmh)!
 
 Description
 ----
