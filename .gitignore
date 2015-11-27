@@ -1,2 +1,2 @@
-pkg
-pkg/*
+build/*
+elm-stuff/*

@@ -1,6 +1,6 @@
 {
   "name": "Amazon Wish List Total",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "manifest_version": 2,
 
   "description": "Totals up the price of all items in the current Amazon wish list.",
@@ -24,18 +24,15 @@
         "*://*.amazon.com.au/gp/registry/*",
         "*://*.amazon.com.br/gp/registry/*"
       ],
-      "js": [
-        "bower_components/nanoajax/nanoajax.min.js",
-        "main.js"
-      ],
-      "css": [ "main.css" ],
+      "js": [ "build/main.js" ],
+      "css": [ "build/main.css" ],
       "run_at": "document_end",
       "all_frames": true
     }
   ],
 
   "icons": {
-    "512": "icon/icon-512.png",
-    "128": "icon/icon-128.png"
+    "512": "resources/icon/icon-512.png",
+    "128": "resources/icon/icon-128.png"
   }
 }
