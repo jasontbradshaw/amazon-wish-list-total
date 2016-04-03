@@ -139,5 +139,8 @@
   "env": {
     "es6": true,
     "browser": true
+  },
+  "globals": {
+    "Elm": false
   }
 }

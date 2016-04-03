@@ -3,7 +3,7 @@
 outdir="./build"
 
 # Use the values specified in `manifest.json` so we can specify them in one
-# plase: there!
+# place: there!
 main_js="$(jq --raw-output '.content_scripts[0].js[0]' manifest.json)"
 main_css="$(jq --raw-output '.content_scripts[0].css[0]' manifest.json)"
 
@@ -16,14 +16,12 @@ out="${outdir}/amazon-wish-list-total-${version}.zip"
 
 # Build/copy the files we'll need to our build directory.
 cp 'src/css/main.css' "${main_css}"
-cp 'src/js/shim.js' "${outdir}/shim.js"
-elm make 'src/elm/Main.elm' --output="${outdir}/elm.js"
+elm make 'src/elm/Main.elm' --output="${outdir}/main.js"
 
-# Concatenate the Elm output and our shim file to create the `main.js` file we
-# include in `manifest.json`.
-echo "" > "${main_js}" # Clear the file first, just in case it contains old data.
-cat "${outdir}/elm.js" >> "${main_js}"
-cat "${outdir}/shim.js" >> "${main_js}"
+# Concatenate the shim file onto our build main file to create the `main.js`
+# file we include in `manifest.json`. The shim boots the app, the rest is Elm
+# and our code.
+cat "src/js/shim.js" >> "${main_js}"
 
 # Grab all the files we'll need from the manifest.
 files="manifest.json $(jq '.content_scripts[0].js[],
