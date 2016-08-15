@@ -138,7 +138,7 @@ const LOCALE = (function () {
     },
 
     '.in': {
-      currency_code: 'ILS',
+      currency_code: 'INR',
       loading_text: 'Calculating wish list total…',
       subtotal_text: function (n) {
         return `Subtotal (item${(n === 1 ? '' : 's')})`;
