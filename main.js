@@ -425,8 +425,7 @@ document.body.appendChild(buildPriceElement({ loading: true })[0]);
 
 // Populate the items database with an initial full download. Once we've
 // finished the initial download, start doing screen-scrape updates too.
-const WISH_LIST_ID = getCurrentWishListId();
-updateDatabaseFromAPI(WISH_LIST_ID).then(() => {
+updateDatabaseFromAPI(getCurrentWishListId()).then(() => {
   // Continuously check the current page for user changes to add to the
   // database.
   setInterval(() => {
@@ -436,5 +435,5 @@ updateDatabaseFromAPI(WISH_LIST_ID).then(() => {
   }, 100);
 
   // Periodically do an update from the API in case other pages have changed.
-  setInterval(() => updateDatabaseFromAPI(WISH_LIST_ID), 5 * 1000);
+  setInterval(() => updateDatabaseFromAPI(getCurrentWishListId()), 5 * 1000);
 });
