@@ -4,29 +4,24 @@
 // UTILS
 //
 
-// Select the given elements from the document and return them as an array.
-const $ = (selectorOrElement, selector) => {
-  let el = selectorOrElement;
-  if (typeof selectorOrElement === 'string') {
-    el = document;
-    selector = selectorOrElement;
-  }
-
-  return Array.prototype.slice.call(el.querySelectorAll(selector));
-};
-
-// Given a `$scope` DOM element and some selectors, returns an array of DOM
-// nodes matching the first selector that finds something, otherwise an empty
-// array if no selectors find anything.
-const $$ = ($scope, ...selectors) => {
-  let $items = [];
+// Given a `$el` DOM element and some selectors, returns an array of DOM nodes
+// matching the first selector that finds something, otherwise an empty array if
+// no selectors match.
+const selectFrom = ($el, ...selectors) => {
   for (let i = 0, len = selectors.length; i < len; i++) {
-    $items = $($scope, selectors[i]);
-    if ($items.length > 0) { break; }
+    const $items = $el.querySelectorAll(selectors[i]);
+    if ($items.length > 0) { return Array.from($items); }
   }
 
-  return $items;
+  return [];
 };
+
+// Same as `#select`, but returns the first result, or `null` if no result
+// matched.
+const selectFirstFrom = (...args) => selectFrom(...args)[0] || null;
+
+// Same as `#selectFirstFrom` on the entire document.
+const selectFirst = selectFirstFrom.bind(null, document);
 
 // Escapes the given string for direct use as HTML. The result is _not_ suitable
 // for use in script tags or style blocks!
@@ -57,7 +52,7 @@ const DOM = (strings, ...values) => {
   const el = document.createElement('div');
   el.innerHTML = parts.join('').trim();
 
-  return Array.prototype.slice.call(el.childNodes);
+  return Array.from(el.childNodes);
 };
 
 // Turns a currency string into a single floating point number. If the number
@@ -255,14 +250,11 @@ const buildPriceElement = (attrs) => {
 
 // Finds the id of the currently-viewed wish list and returns it as a string.
 const getCurrentWishListId = () => {
-  const $state = $('script[type="a-state"][data-a-state*="navState"]');
+  const $state = selectFirst('script[type="a-state"][data-a-state*="navState"]');
+  if (!$state) { return null; }
 
-  if ($state.length > 0) {
-    const json = JSON.parse($state[0].textContent);
-    return json.linkArgs.id;
-  } else {
-    return null;
-  }
+  const json = JSON.parse($state.textContent);
+  return json.linkArgs.id;
 };
 
 // Given a DOM node for an item, parses it and returns JSON data for it.
@@ -270,18 +262,18 @@ const parseItem = ($item) => {
   // Each item element hopefully has an id like "id_ITEMIDSTUFF"
   const id = $item.id.split('_')[1];
 
-  const $name = $$($item, '[id^="itemName_"]', '.g-title a');
-  const $want = $$($item, '[id^="itemRequested_"]', '[name^="requestedQty"]');
-  const $have = $$($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]');
+  const $name = selectFirstFrom($item, '[id^="itemName_"]', '.g-title a');
+  const $want = selectFirstFrom($item, '[id^="itemRequested_"]', '[name^="requestedQty"]');
+  const $have = selectFirstFrom($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]');
 
   // If the item isn't available, attempt to use the "Used & New" price.
-  let $price = $($item, '[id^="itemPrice_"]');
-  if ($price.length === 0 || !$price[0].innerText.trim()) {
-    $price = $($item, '.itemUsedAndNewPrice');
+  let $price = selectFirstFrom($item, '[id^="itemPrice_"]');
+  if (!$price || !$price.innerText.trim()) {
+    $price = selectFirstFrom($item, '.itemUsedAndNewPrice');
   }
 
   let itemName = '';
-  if ($name.length > 0) { itemName = $name[0].innerText.trim(); }
+  if ($name) { itemName = $name.innerText.trim(); }
 
   // This will deal nicely with parsing values that have a range, like "$29.95 -
   // $33.95" since it will parses out only the first value. Occasionally, items
@@ -289,16 +281,16 @@ const parseItem = ($item) => {
   // list price and are set to a price of zero. If the price has no digits in it
   // at all, we assume it's unavailable/broken and set its value to 0.
   let price = 0;
-  if ($price[0] && /\d/.test($price[0].innerText)) {
-    price = parseCurrency($price[0].innerText);
+  if ($price && /\d/.test($price.innerText)) {
+    price = parseCurrency($price.innerText);
   }
 
-  // luckily, these show up even when not visible on the page!
+  // Luckily, these show up in the HTML even when not visible on the page!
   let want = 1;
-  if ($want.length > 0) { want = parseInt(valOrText($want[0]), 10) || 1; }
+  if ($want) { want = parseInt(valOrText($want), 10) || 1; }
 
   let have = 0;
-  if ($have.length > 0) { have = parseInt(valOrText($have[0]), 10) || 0; }
+  if ($have) { have = parseInt(valOrText($have), 10) || 0; }
 
   let need = Math.max(0, want - have);
 
@@ -329,7 +321,7 @@ const parseItem = ($item) => {
 // array of individual JSON wish list items.
 const parsePage = ($page) => {
   // Parse all items into an array of JSON objects.
-  return $($page, '.g-items-section [id^="item_"]').map(($item) => {
+  return selectFrom($page, '.g-items-section [id^="item_"]').map(($item) => {
     // Deleted items get parsed as having no price, which effectively deletes
     // them from the database (a useful thing so we don't have to do a real
     // delete).
@@ -385,7 +377,7 @@ const fetchWishListPages = (id, pages = []) => {
 
     // If we have another page to download (i.e. we have an accessible "Next"
     // link), continue, otherwise return.
-    const $nextPage = $($page, '#wishlistPagination .a-last:not(.a-disabled) a');
+    const $nextPage = selectFrom($page, '#wishlistPagination .a-last:not(.a-disabled) a');
     if ($nextPage.length > 0) {
       return fetchWishListPages(id, pages);
     } else {
@@ -418,7 +410,7 @@ const renderItemsFromDatabase = () => {
 
   // Render our items into the DOM, assuming it still exists!
   const totals = calculateItemTotals(items);
-  const $el = $(`#${ELEMENT_ID}`)[0];
+  const $el = selectFirst(`#${ELEMENT_ID}`);
 
   // A simple hash to indicate when we need to re-render.
   const currentHash = totals.total_count * 31 + totals.total_price * 7;
@@ -428,8 +420,8 @@ const renderItemsFromDatabase = () => {
   }
 };
 
-// Add a loading message that will be replaced later with our parsed info
-$('body')[0].appendChild(buildPriceElement({ loading: true })[0]);
+// Add a loading message that will be replaced later with our parsed info.
+document.body.appendChild(buildPriceElement({ loading: true })[0]);
 
 // Populate the items database with an initial full download. Once we've
 // finished the initial download, start doing screen-scrape updates too.
