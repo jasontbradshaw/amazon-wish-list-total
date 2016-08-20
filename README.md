@@ -19,8 +19,11 @@ the screen, and updates it dynamically when items are added or deleted.
 
 Changelog
 ----
+#### 1.6.1
+* Add some smaller pre-built extension icons
+
 #### 1.6.0
-* Don't accidentally reveal when items have been bought for you!
+* Don't accidentally reveal when items have been bought for you
 
 #### 1.5.2
 * Redesign extension icon
