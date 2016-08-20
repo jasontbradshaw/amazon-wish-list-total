@@ -105,11 +105,6 @@ const valOrText = ($el) => { return $el.value || $el.innerText; };
 // EXTENSION
 //
 
-// This is the element that either contains nothing of substance, _or_ contains
-// the "Ship-to" address. We append our element to this so that it always shows
-// up below either the wish list title _or_ the "Ship-to" address, if present.
-const ELEMENT_ID = 'wishlist-total';
-
 // Information about the current locale, including how to translate the
 // different text in the application.
 const LOCALE = (() => {
@@ -216,44 +211,6 @@ const LOCALE = (() => {
   return localizationData['.com'];
 })();
 
-// Build and return a DOM element for our element.
-const buildPriceElement = (attrs) => {
-  attrs = attrs || {};
-
-  if (attrs.loading) {
-    return DOM`
-      <div id="${ELEMENT_ID}" class="animation-fade-in">
-        <i>${LOCALE.loading_text}</i>
-      </div>
-    `;
-  } else {
-    // Format the total price as the locale dictates.
-    const localeTotal = attrs.total_price.toLocaleString(undefined, {
-      style: 'currency',
-      currency: LOCALE.currency_code,
-      currencyDisplay: 'symbol',
-    });
-
-    return DOM`
-      <div id="${ELEMENT_ID}">
-        <span class="total-text">${LOCALE.subtotal_text(attrs.total_count)}</span>:
-        <span class="total-price a-color-price">
-          ${localeTotal}
-        </span>
-      </div>
-    `;
-  }
-};
-
-// Finds the id of the currently-viewed wish list and returns it as a string.
-const getCurrentWishListId = () => {
-  const $state = selectFirst('script[type="a-state"][data-a-state*="navState"]');
-  if (!$state) { return null; }
-
-  const json = JSON.parse($state.textContent);
-  return json.linkArgs.id;
-};
-
 // Given a DOM node for an item, parses it and returns JSON data for it.
 const parseItem = ($item) => {
   // Each item element hopefully has an id like "id_ITEMIDSTUFF"
@@ -274,9 +231,10 @@ const parseItem = ($item) => {
 
   // This will deal nicely with parsing values that have a range, like "$29.95 -
   // $33.95" since it will parses out only the first value. Occasionally, items
-  // will have a price of "Unavailable", in which case they can't contribute to the total
-  // list price and are set to a price of zero. If the price has no digits in it
-  // at all, we assume it's unavailable/broken and set its value to 0.
+  // will have a price of "Unavailable", in which case they can't contribute to
+  // the total list price and are set to a price of zero. If the price has no
+  // digits in it at all, we assume it's unavailable/broken and set its value to
+  // 0.
   let price = 0;
   if ($price && /\d/.test($price.innerText)) {
     price = parseCurrency($price.innerText);
@@ -328,29 +286,12 @@ const parsePage = ($page) => {
 
 // Given an array of wish list pages, parses the items out of each of them and
 // returns a JSON object representing the overall wish list.
-const parseWishList = (pages) => {
+const parseWishList = ($pages) => {
   const items = [];
-  pages.forEach(($page) => {
+  for (const $page of $pages) {
     items.push.apply(items, parsePage($page));
-  });
-  return items;
-};
-
-// Given an iterable of item objects, calculates overall price and count.
-const calculateItemTotals = (items) => {
-  let totalCount = 0;
-  let totalPrice = 0;
-  for (const item of items) {
-    // Only count items that we found a price for, i.e. that were available on
-    // Amazon and not just from other retailers.
-    totalCount = totalCount + (item.price ? item.counts.need : 0);
-    totalPrice = totalPrice + item.total_price;
   }
-
-  return {
-    total_count: totalCount,
-    total_price: totalPrice,
-  };
+  return items;
 };
 
 // Download all available pages for the given wish list and return a Promise
@@ -395,6 +336,57 @@ const updateDatabaseFromAPI = (database, id) => {
   });
 };
 
+// Build and return a single DOM element for our whole application.
+const render = (attrs = {}) => {
+  // The name of our element. If you change this, you'll need to change the CSS
+  // to match.
+  const elementId = 'wishlist-total';
+
+  let $price;
+  if (attrs.loading) {
+    $price = DOM`
+      <div id="${elementId}" class="animation-fade-in">
+        <i>${LOCALE.loading_text}</i>
+      </div>
+    `;
+  } else {
+    // Format the total price as the locale dictates.
+    const localeTotal = attrs.total_price.toLocaleString(undefined, {
+      style: 'currency',
+      currency: LOCALE.currency_code,
+      currencyDisplay: 'symbol',
+    });
+
+    $price = DOM`
+      <div id="${elementId}">
+        <span class="total-text">${LOCALE.subtotal_text(attrs.total_count)}</span>:
+        <span class="total-price a-color-price">
+          ${localeTotal}
+        </span>
+      </div>
+    `;
+  }
+
+  return $price[0];
+};
+
+// Given an iterable of item objects, calculates overall price and count.
+const calculateItemTotals = (items) => {
+  let totalCount = 0;
+  let totalPrice = 0;
+  for (const item of items) {
+    // Only count items that we found a price for, i.e. that were available on
+    // Amazon and not just from other retailers.
+    totalCount = totalCount + (item.price ? item.counts.need : 0);
+    totalPrice = totalPrice + item.total_price;
+  }
+
+  return {
+    total_count: totalCount,
+    total_price: totalPrice,
+  };
+};
+
 // Hashes the given database and returns a unique value that changes when the
 // database meaningfully changes.
 const hashDatbaseForRendering = (database) => {
@@ -402,22 +394,31 @@ const hashDatbaseForRendering = (database) => {
   return (totals.total_count * 31) + (totals.total_price * 7);
 };
 
-// Render all the items in the current database, assuming the totals have
-// changed since the last render. Returns the new hash of the given database as
-// calculated by `#hashDatbaseForRendering`.
-const renderDatabase = (database, previousHash = null) => {
+// Re-render into `$root` only if the hash has changed since the last render.
+// Returns the new hash of the given database as calculated by
+// `#hashDatbaseForRendering`.
+const renderIntoRootFromDatabase = ($root, database, previousHash = null) => {
   // Render our items into the DOM, assuming it still exists!
   const totals = calculateItemTotals(database.values());
-  const $el = selectFirst(`#${ELEMENT_ID}`);
 
-  // If the total or the price changes, we need to re-render. This is a simple
-  // "hash" to determine that quickly.
+  // If the hash has changed since the last rendering, we need to re-render.
   const currentHash = hashDatbaseForRendering(database);
-  if ($el && currentHash !== previousHash) {
-    $el.parentElement.replaceChild(buildPriceElement(totals)[0], $el);
+  if (currentHash !== previousHash) {
+    $root.innerHTML = render(totals).outerHTML;
   }
 
   return currentHash;
+};
+
+// Finds the id of the currently-viewed wish list and returns it as a string.
+const getCurrentWishListId = () => {
+  // Amazon stores the state of this page in a convenient JSON blob we can
+  // access to get the id!
+  const $state = selectFirst('script[type="a-state"][data-a-state*="navState"]');
+  if (!$state) { return null; }
+
+  const json = JSON.parse($state.textContent);
+  return json.linkArgs.id;
 };
 
 //
@@ -425,27 +426,33 @@ const renderDatabase = (database, previousHash = null) => {
 //
 
 (() => {
-  // Add a loading message that will be replaced later with our parsed info.
-  document.body.appendChild(buildPriceElement({ loading: true })[0]);
+  // Build our root element, the one we'll render everything in to.
+  const $root = document.body.appendChild(document.createElement('div'));
+
+  // Do an initial render of a loading message. This will be replaced once we
+  // successfully calculate the totals.
+  $root.appendChild(render({ loading: true }));
+
+  // The database of items we're currently displaying. This is used so we can
+  // poll the current page for changes instead of having to scrape the entire
+  // list constantly.
+  const database = new Map();
+  let databaseHash = hashDatbaseForRendering(database);
 
   // Populate the items database with an initial full download. Once we've
   // finished the initial download, start doing screen-scrape updates too.
-  updateDatabaseFromAPI(getCurrentWishListId()).then(() => {
-    // The database of items we're currently displaying. This is used so we can
-    // poll the current page for changes instead of having to scrape the entire
-    // list constantly.
-    const database = new Map();
-    let databaseHash = hashDatbaseForRendering(database);
-
+  updateDatabaseFromAPI(database, getCurrentWishListId()).then(() => {
     // Continuously check the current page for user changes to add to the
     // database.
     setInterval(() => {
       const items = parsePage(document.documentElement);
       updateDatabaseFromItems(database, items);
-      databaseHash = renderDatabase(database, databaseHash);
+
+      // Update the hash to reflect what was just rendered.
+      databaseHash = renderIntoRootFromDatabase($root, database, databaseHash);
     }, 100);
 
     // Periodically do an update from the API in case other pages have changed.
-    setInterval(() => updateDatabaseFromAPI(getCurrentWishListId()), 5 * 1000);
+    setInterval(() => updateDatabaseFromAPI(database, getCurrentWishListId()), 5 * 1000);
   });
 })();
