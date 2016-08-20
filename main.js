@@ -25,12 +25,14 @@ const selectFirst = selectFirstFrom.bind(null, document);
 
 // Escapes the given string for direct use as HTML. The result is _not_ suitable
 // for use in script tags or style blocks!
-const escapeHTML = (s) => (s || '').replace(/[<>]/g, (c) => {
+const escapeHTML = (s) => (s || '').replace(/[<>"]/g, (c) => {
   switch (c) {
   case '<':
     return '&lt;';
   case '>':
     return '&gt;';
+  case '"':
+    return '&quot;';
   default:
     throw new Error(`Invalid HTML escape character: '${c}'`);
   }
