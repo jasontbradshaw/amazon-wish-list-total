@@ -219,6 +219,7 @@ const parseItem = ($item) => {
   const $name = selectFirstFrom($item, '[id^="itemName_"]', '.g-title a');
   const $want = selectFirstFrom($item, '[id^="itemRequested_"]', '[name^="requestedQty"]');
   const $have = selectFirstFrom($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]');
+  const $editLink = selectFirstFrom($item, '[id^="itemEditLabel_"]');
 
   // If the item isn't available, attempt to use the "Used & New" price.
   let $price = selectFirstFrom($item, '[id^="itemPrice_"]');
@@ -228,6 +229,14 @@ const parseItem = ($item) => {
 
   let itemName = '';
   if ($name) { itemName = $name.innerText.trim(); }
+
+  // Items are "blacked-out" if someone bought them for you, but they remain on
+  // your list.
+  let isBlackedOut = false;
+  if ($editLink) {
+    const data = JSON.parse($editLink.dataset.regDispatchModal);
+    isBlackedOut = Boolean(data.data.showBlackoutMsg);
+  }
 
   // This will deal nicely with parsing values that have a range, like "$29.95 -
   // $33.95" since it will parses out only the first value. Occasionally, items
@@ -244,8 +253,10 @@ const parseItem = ($item) => {
   let want = 1;
   if ($want) { want = parseInt(valOrText($want), 10) || 1; }
 
+  // Only set the `have` count if the item isn't blacked out; we don't want to
+  // spoil any surprises, after all!
   let have = 0;
-  if ($have) { have = parseInt(valOrText($have), 10) || 0; }
+  if ($have && !isBlackedOut) { have = parseInt(valOrText($have), 10) || 0; }
 
   let need = Math.max(0, want - have);
 
