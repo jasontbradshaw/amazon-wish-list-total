@@ -422,26 +422,28 @@ const renderDatabase = (database, previousHash = null) => {
 // MAIN
 //
 
-// Add a loading message that will be replaced later with our parsed info.
-document.body.appendChild(buildPriceElement({ loading: true })[0]);
+(() => {
+  // Add a loading message that will be replaced later with our parsed info.
+  document.body.appendChild(buildPriceElement({ loading: true })[0]);
 
-// Populate the items database with an initial full download. Once we've
-// finished the initial download, start doing screen-scrape updates too.
-updateDatabaseFromAPI(getCurrentWishListId()).then(() => {
-  // The database of items we're currently displaying. This is used so we can
-  // poll the current page for changes instead of having to scrape the entire
-  // list constantly.
-  const database = new Map();
-  let databaseHash = hashDatbaseForRendering(database);
+  // Populate the items database with an initial full download. Once we've
+  // finished the initial download, start doing screen-scrape updates too.
+  updateDatabaseFromAPI(getCurrentWishListId()).then(() => {
+    // The database of items we're currently displaying. This is used so we can
+    // poll the current page for changes instead of having to scrape the entire
+    // list constantly.
+    const database = new Map();
+    let databaseHash = hashDatbaseForRendering(database);
 
-  // Continuously check the current page for user changes to add to the
-  // database.
-  setInterval(() => {
-    const items = parsePage(document.documentElement);
-    updateDatabaseFromItems(database, items);
-    databaseHash = renderDatabase(database, databaseHash);
-  }, 100);
+    // Continuously check the current page for user changes to add to the
+    // database.
+    setInterval(() => {
+      const items = parsePage(document.documentElement);
+      updateDatabaseFromItems(database, items);
+      databaseHash = renderDatabase(database, databaseHash);
+    }, 100);
 
-  // Periodically do an update from the API in case other pages have changed.
-  setInterval(() => updateDatabaseFromAPI(getCurrentWishListId()), 5 * 1000);
-});
+    // Periodically do an update from the API in case other pages have changed.
+    setInterval(() => updateDatabaseFromAPI(getCurrentWishListId()), 5 * 1000);
+  });
+})();
