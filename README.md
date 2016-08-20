@@ -19,6 +19,9 @@ the screen, and updates it dynamically when items are added or deleted.
 
 Changelog
 ----
+#### 1.5.2
+* Redesign extension icon
+
 #### 1.5.1
 * Use correct currency code for amazon.in (thanks @ashishsinghxyz!)
 
