@@ -489,7 +489,18 @@ updateDatabaseFromAPI(WISH_LIST_ID, function () {
   }, 100);
 
   // Periodically do an update from the API in case other pages have changed.
+  let previousItemCount = null;
   setInterval(function () {
-    updateDatabaseFromAPI(WISH_LIST_ID);
-  }, 3 * 60 * 1000);
+    updateDatabaseFromAPI(WISH_LIST_ID, function () {
+      // If the number of items in the list changes, reload the list so we can
+      // tell!
+      const itemCount = Object.keys(ITEMS).length;
+      if (previousItemCount === null) {
+        previousItemCount = itemCount;
+      } else if (previousItemCount !== itemCount) {
+        window.location.reload(true);
+        return;
+      }
+    });
+  }, 5 * 1000);
 });
