@@ -1,4 +1,4 @@
-[![Chrome Web Store Badge](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/screenshots/badge.png)](https://chrome.google.com/webstore/detail/amazon-wish-list-total/boekbkconiendicldakeboooeilaldmh)
+[![Chrome Web Store Badge](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/images/badge.png)](https://chrome.google.com/webstore/detail/amazon-wish-list-total/boekbkconiendicldakeboooeilaldmh)
 
 Amazon Wish List Total
 ======================
