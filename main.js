@@ -28,17 +28,6 @@ const $$ = ($scope, ...selectors) => {
   return $items;
 };
 
-// Given an element and a selector, returns the closest matching parent node
-// (including the element itself), or `null` if none matches.
-const closest = ($el, selector) => {
-  let $current = $el;
-  while ($current && !$current.matches(selector)) {
-    $current = $current.parentElement;
-  }
-
-  return $current || null;
-};
-
 // Escapes the given string for direct use as HTML. The result is _not_ suitable
 // for use in script tags or style blocks!
 const escapeHTML = (s) => (s || '').replace(/[<>]/g, (c) => {
@@ -316,7 +305,7 @@ const parseItem = ($item) => {
 
   // Set all counts to zero if the item has been deleted. This means the totals
   // we get will be 0, meaning the item won't affect overall calculations.
-  if (closest($item, '.g-item-sortable-removed')) {
+  if ($item.closest('.g-item-sortable-removed')) {
     want = 0;
     have = 0;
     need = 0;
