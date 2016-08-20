@@ -46,7 +46,6 @@ const escapeHTML = (s) => (s || '').replace(/[<>]/g, (c) => {
 // single item was specified in the string.
 const DOM = (strings, ...values) => {
   const parts = [];
-
   for (let i = 0, len = Math.max(strings.length, values.length); i < len; i++) {
     const s = strings[i];
     const v = values[i];
@@ -368,19 +367,16 @@ const calculateItemTotals = (items) => {
   };
 };
 
-// Download all available pages for the given wish list and return them to the
-// callback as an array of DOM elements.
-const fetchWishListPages = (id, callback, pages) => {
-  // Any pages that have been fetched so far, defaulting to none at all.
-  pages = pages || [];
-  const pageNumber = pages.length + 1;
-
-  console.log(`fetching wish list page ${pageNumber}...`);
-
-  // Fetch the current page and add it to our list. When we're done fetching
-  // pages, call the callback with them.
-  const url = `/gp/registry/wishlist/${id}?page=${pageNumber}`;
-  fetch(url).then((res) => res.text()).then((responseText) => {
+// Download all available pages for the given wish list and return a Promise
+// that fulfills with an array of HTML document elements, or rejects with an
+// error.
+const fetchWishListPages = (id, pages = []) => {
+  // Fetch the next page and add it to our list. If we have no pages yet, the
+  // "next" page is the very first one! When we're done fetching all the pages,
+  // return a Promise for an array of HTML document objects, each representing a
+  // fetched page.
+  const url = `/gp/registry/wishlist/${id}?page=${pages.length + 1}`;
+  return fetch(url).then((res) => res.text()).then((responseText) => {
     // Parse the downloaded data into a document and add it to our accumulated
     // pages list.
     const $page = document.implementation.createHTMLDocument();
@@ -391,35 +387,25 @@ const fetchWishListPages = (id, callback, pages) => {
     // link), continue, otherwise return.
     const $nextPage = $($page, '#wishlistPagination .a-last:not(.a-disabled) a');
     if ($nextPage.length > 0) {
-      return fetchWishListPages(id, callback, pages);
+      return fetchWishListPages(id, pages);
     } else {
-      console.log('done fetching!');
-      return callback(pages);
+      return pages;
     }
-  }).catch((err) => {
-    console.error('failed to fetch page:', err);
-    return callback([]);
   });
 };
 
 // Add the given items to our wish list database, overwriting any existing ones.
 const updateDatabaseFromItems = (items) => {
-  items.forEach((item) => {
-    ITEMS[item.id] = item;
-  });
+  items.forEach((item) => { ITEMS[item.id] = item; });
 };
 
 // Given a wish list id, downloads all its pages, parses the items, adds them to
-// the global database, then calls the given callback.
-const updateDatabaseFromAPI = (id, callback) => {
-  callback = callback || (() => {});
-
-  fetchWishListPages(id, (pages) => {
+// the global database, then returns a Promise that fulfills once the process is
+// complete.
+const updateDatabaseFromAPI = (id) => {
+  return fetchWishListPages(id).then((pages) => {
     const items = parseWishList(pages);
     updateDatabaseFromItems(items);
-
-    // Notify that we've finished adding the items to the global database.
-    callback(null);
   });
 };
 
@@ -448,7 +434,7 @@ $('body')[0].appendChild(buildPriceElement({ loading: true })[0]);
 // Populate the items database with an initial full download. Once we've
 // finished the initial download, start doing screen-scrape updates too.
 const WISH_LIST_ID = getCurrentWishListId();
-updateDatabaseFromAPI(WISH_LIST_ID, () => {
+updateDatabaseFromAPI(WISH_LIST_ID).then(() => {
   // Continuously check the current page for user changes to add to the
   // database.
   setInterval(() => {
