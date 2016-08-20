@@ -19,6 +19,9 @@ the screen, and updates it dynamically when items are added or deleted.
 
 Changelog
 ----
+#### 1.6.2
+* Ensure empty lists show a zero total, not a perpetual loading message
+
 #### 1.6.1
 * Add some smaller pre-built extension icons
 
