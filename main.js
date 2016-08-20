@@ -1,8 +1,5 @@
 'use strict';
 
-// AJAX!
-const ajax = window.nanoajax.ajax;
-
 // This is the element that either contains nothing of substance, _or_ contains
 // the "Ship-to" address. We append our element to this so that it always shows
 // up below either the wish list title _or_ the "Ship-to" address, if present.
@@ -398,7 +395,7 @@ const calculateItemTotals = function (items) {
 
 // Download all available pages for the given wish list and return them to the
 // callback as an array of DOM elements.
-const fetchWishListPages = function (id, callback, pages) {
+const fetchWishListPages = (id, callback, pages) => {
   // Any pages that have been fetched so far, defaulting to none at all.
   pages = pages || [];
   const pageNumber = pages.length + 1;
@@ -408,28 +405,25 @@ const fetchWishListPages = function (id, callback, pages) {
   // Fetch the current page and add it to our list. When we're done fetching
   // pages, call the callback with them.
   const url = `/gp/registry/wishlist/${id}?page=${pageNumber}`;
-  ajax(url, function (code, responseText) {
-    if (code >= 200 && code < 300) {
-      // parse the downloaded data into a document and add it to our accumulated
-      // pages list.
-      const $page = document.implementation.createHTMLDocument();
-      $page.documentElement.innerHTML = responseText;
-      pages.push($page);
+  fetch(url).then((res) => res.text()).then((responseText) => {
+    // Parse the downloaded data into a document and add it to our accumulated
+    // pages list.
+    const $page = document.implementation.createHTMLDocument();
+    $page.documentElement.innerHTML = responseText;
+    pages.push($page);
 
-      // If we have another page to download (i.e. we have an accessible "Next"
-      // link), continue, otherwise return.
-      const $nextPage = $($page, '#wishlistPagination .a-last:not(.a-disabled) a');
-      if ($nextPage.length > 0) {
-        fetchWishListPages(id, callback, pages);
-      } else {
-        console.log('done fetching!');
-        return callback(pages);
-      }
+    // If we have another page to download (i.e. we have an accessible "Next"
+    // link), continue, otherwise return.
+    const $nextPage = $($page, '#wishlistPagination .a-last:not(.a-disabled) a');
+    if ($nextPage.length > 0) {
+      return fetchWishListPages(id, callback, pages);
     } else {
-      // log an error and return nothing if we failed
-      console.error('failed to fetch page', arguments);
-      return callback([]);
+      console.log('done fetching!');
+      return callback(pages);
     }
+  }).catch((err) => {
+    console.error('failed to fetch page:', err);
+    return callback([]);
   });
 };
 
