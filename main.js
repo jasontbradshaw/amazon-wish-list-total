@@ -448,7 +448,10 @@ const getCurrentWishListId = () => {
   // poll the current page for changes instead of having to scrape the entire
   // list constantly.
   const database = new Map();
-  let databaseHash = hashDatbaseForRendering(database);
+
+  // We set this to `null` explicitly so that the first time the database is
+  // _actually_ hashed, it will force a render and replace the loading message.
+  let databaseHash = null;
 
   // Populate the items database with an initial full download. Once we've
   // finished the initial download, start doing screen-scrape updates too.
