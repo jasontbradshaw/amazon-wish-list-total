@@ -1,14 +1,8 @@
 'use strict';
 
-// This is the element that either contains nothing of substance, _or_ contains
-// the "Ship-to" address. We append our element to this so that it always shows
-// up below either the wish list title _or_ the "Ship-to" address, if present.
-const ELEMENT_ID = 'wishlist-total';
-
-// The database of items we're currently displaying. This is used so we can poll
-// the current page for changes instead of having to scrape the entire list
-// constantly.
-const ITEMS = {};
+//
+// UTILS
+//
 
 // Select the given elements from the document and return them as an array.
 const $ = (selectorOrElement, selector) => {
@@ -33,6 +27,108 @@ const $$ = ($scope, ...selectors) => {
 
   return $items;
 };
+
+// Given an element and a selector, returns the closest matching parent node
+// (including the element itself), or `null` if none matches.
+const closest = ($el, selector) => {
+  let $current = $el;
+  while ($current && !$current.matches(selector)) {
+    $current = $current.parentElement;
+  }
+
+  return $current || null;
+};
+
+// Escapes the given string for direct use as HTML. The result is _not_ suitable
+// for use in script tags or style blocks!
+const escapeHTML = (s) => (s || '').replace(/[<>]/g, (c) => {
+  switch (c) {
+  case '<':
+    return '&lt;';
+  case '>':
+    return '&gt;';
+  default:
+    throw new Error(`Invalid HTML escape character: '${c}'`);
+  }
+});
+
+// A tagged template function for building a DOM element. Returns an array of
+// constructed DOM elements, possibly containing only a single item if only a
+// single item was specified in the string.
+const DOM = (strings, ...values) => {
+  const parts = [];
+
+  for (let i = 0, len = Math.max(strings.length, values.length); i < len; i++) {
+    const s = strings[i];
+    const v = values[i];
+
+    if (s) { parts.push(s); }
+    if (v) { parts.push(escapeHTML(v)); }
+  }
+
+  const el = document.createElement('div');
+  el.innerHTML = parts.join('').trim();
+
+  return Array.prototype.slice.call(el.childNodes);
+};
+
+// Turns a currency string into a single floating point number. If the number
+// has thousands separators _or_ uses commas instead of periods to separate the
+// fraction, we normalize the number to a decimal fraction first. If multiple
+// currency values are included in the string, an average of all of them is
+// returned.
+const parseCurrency = (s) => {
+  // Pare down our string to include only digits, commas, periods, and single
+  // literal spaces instead of multiple whitespace characters.
+  s = (s || '')
+      .replace(/[^0-9.,\s]+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  // Get all the possible numbers in the string.
+  const parts = s.split(/\s/g);
+
+  const values = parts.map((part) => {
+    // Use the number's final non-digit character to detect whether it's
+    // formatted with periods (1,234.56) or commas (1.234,56).
+    const commaSeparated = part.replace(/[^.,]+/g, '').endsWith(',');
+
+    // If it's comma-separated, normalize it to a decimal number.
+    if (commaSeparated) {
+      // Turns '1.234,56' into '1234.56'.
+      const commaParts = part.split(',');
+      part = commaParts[0].replace(/\./g, '') + '.' + commaParts[1];
+    } else {
+      part = part.replace(/,/g, '');
+    }
+
+    // Turn our now-normalized value into a base-10 float.
+    return parseFloat(part, 10);
+  });
+
+  // Calculate and return the average of the parsed values.
+  return values.reduce((sum, value) => {
+    return sum + value;
+  }, 0) / parts.length;
+};
+
+// Returns either the value of the given element if possible, otherwise its
+// text.
+const valOrText = ($el) => { return $el.value || $el.innerText; };
+
+//
+// EXTENSION
+//
+
+// This is the element that either contains nothing of substance, _or_ contains
+// the "Ship-to" address. We append our element to this so that it always shows
+// up below either the wish list title _or_ the "Ship-to" address, if present.
+const ELEMENT_ID = 'wishlist-total';
+
+// The database of items we're currently displaying. This is used so we can poll
+// the current page for changes instead of having to scrape the entire list
+// constantly.
+const ITEMS = {};
 
 // Information about the current locale, including how to translate the
 // different text in the application.
@@ -140,50 +236,6 @@ const LOCALE = (() => {
   return localizationData['.com'];
 })();
 
-// Given an element and a selector, returns the closest matching parent node
-// (including the element itself), or `null` if none matches.
-const closest = ($el, selector) => {
-  let $current = $el;
-  while ($current && !$current.matches(selector)) {
-    $current = $current.parentElement;
-  }
-
-  return $current || null;
-};
-
-// Escapes the given string for direct use as HTML. The result is _not_ suitable
-// for use in script tags or style blocks!
-const escapeHTML = (s) => (s || '').replace(/[<>]/g, (c) => {
-  switch (c) {
-  case '<':
-    return '&lt;';
-  case '>':
-    return '&gt;';
-  default:
-    throw new Error(`Invalid HTML escape character: '${c}'`);
-  }
-});
-
-// A tagged template function for building a DOM element. Returns an array of
-// constructed DOM elements, possibly containing only a single item if only a
-// single item was specified in the string.
-const DOM = (strings, ...values) => {
-  const parts = [];
-
-  for (let i = 0, len = Math.max(strings.length, values.length); i < len; i++) {
-    const s = strings[i];
-    const v = values[i];
-
-    if (s) { parts.push(s); }
-    if (v) { parts.push(escapeHTML(v)); }
-  }
-
-  const el = document.createElement('div');
-  el.innerHTML = parts.join('').trim();
-
-  return Array.prototype.slice.call(el.childNodes);
-};
-
 // Build and return a DOM element for our element.
 const buildPriceElement = (attrs) => {
   attrs = attrs || {};
@@ -223,50 +275,6 @@ const getCurrentWishListId = () => {
   } else {
     return null;
   }
-};
-
-// Returns either the value of the given element if possible, otherwise its
-// text.
-const valOrText = ($el) => { return $el.value || $el.innerText; };
-
-// Turns a currency string into a single floating point number. If the number
-// has thousands separators _or_ uses commas instead of periods to separate the
-// fraction, we normalize the number to a decimal fraction first. If multiple
-// currency values are included in the string, an average of all of them is
-// returned.
-const parseCurrency = (s) => {
-  // Pare down our string to include only digits, commas, periods, and single
-  // literal spaces instead of multiple whitespace characters.
-  s = (s || '')
-      .replace(/[^0-9.,\s]+/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-  // Get all the possible numbers in the string.
-  const parts = s.split(/\s/g);
-
-  const values = parts.map((part) => {
-    // Use the number's final non-digit character to detect whether it's
-    // formatted with periods (1,234.56) or commas (1.234,56).
-    const commaSeparated = part.replace(/[^.,]+/g, '').endsWith(',');
-
-    // If it's comma-separated, normalize it to a decimal number.
-    if (commaSeparated) {
-      // Turns '1.234,56' into '1234.56'.
-      const commaParts = part.split(',');
-      part = commaParts[0].replace(/\./g, '') + '.' + commaParts[1];
-    } else {
-      part = part.replace(/,/g, '');
-    }
-
-    // Turn our now-normalized value into a base-10 float.
-    return parseFloat(part, 10);
-  });
-
-  // Calculate and return the average of the parsed values.
-  return values.reduce((sum, value) => {
-    return sum + value;
-  }, 0) / parts.length;
 };
 
 // Given a DOM node for an item, parses it and returns JSON data for it.
