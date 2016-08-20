@@ -35,7 +35,6 @@
   ],
 
   "icons": {
-    "512": "icon/icon-512.png",
     "128": "icon/icon-128.png"
   }
 }
