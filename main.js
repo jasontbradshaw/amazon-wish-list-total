@@ -308,26 +308,26 @@ const parseWishList = ($pages) => {
 // Download all available pages for the given wish list and return a Promise
 // that fulfills with an array of HTML document elements, or rejects with an
 // error.
-const fetchWishListPages = (id, pages = []) => {
+const fetchWishListPages = (id, $pages = []) => {
   // Fetch the next page and add it to our list. If we have no pages yet, the
   // "next" page is the very first one! When we're done fetching all the pages,
   // return a Promise for an array of HTML document objects, each representing a
   // fetched page.
-  const url = `/gp/registry/wishlist/${id}?page=${pages.length + 1}`;
+  const url = `/gp/registry/wishlist/${id}?page=${$pages.length + 1}`;
   return fetch(url).then((res) => res.text()).then((responseText) => {
     // Parse the downloaded data into a document and add it to our accumulated
     // pages list.
     const $page = document.implementation.createHTMLDocument();
     $page.documentElement.innerHTML = responseText;
-    pages.push($page);
+    $pages.push($page);
 
     // If we have another page to download (i.e. we have an accessible "Next"
     // link), continue, otherwise return.
-    const $nextPage = selectFrom($page, '#wishlistPagination .a-last:not(.a-disabled) a');
-    if ($nextPage.length > 0) {
-      return fetchWishListPages(id, pages);
+    const $nextPage = selectFirstFrom($page, '#wishlistPagination .a-last:not(.a-disabled) a');
+    if ($nextPage) {
+      return fetchWishListPages(id, $pages);
     } else {
-      return pages;
+      return $pages;
     }
   });
 };
@@ -341,8 +341,8 @@ const updateDatabaseFromItems = (database, items) => {
 // the global database, then returns a Promise that fulfills once the process is
 // complete.
 const updateDatabaseFromAPI = (database, id) => {
-  return fetchWishListPages(id).then((pages) => {
-    const items = parseWishList(pages);
+  return fetchWishListPages(id).then(($pages) => {
+    const items = parseWishList($pages);
     updateDatabaseFromItems(database, items);
   });
 };
