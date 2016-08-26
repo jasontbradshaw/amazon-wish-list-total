@@ -467,6 +467,6 @@ const getCurrentWishListId = () => {
     }, 100);
 
     // Periodically do an update from the API in case other pages have changed.
-    setInterval(() => updateDatabaseFromAPI(database, getCurrentWishListId()), 5 * 1000);
+    setInterval(() => updateDatabaseFromAPI(database, getCurrentWishListId()), 10 * 1000);
   });
 })();
