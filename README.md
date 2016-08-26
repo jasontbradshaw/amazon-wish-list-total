@@ -32,7 +32,7 @@ Changelog
 * Redesign extension icon
 
 #### 1.5.1
-* Use correct currency code for amazon.in (thanks @ashishsinghxyz!)
+* Use correct currency code for amazon.in (thanks [@ashishsinghxyz](https://github.com/ashishsinghxyz)!)
 
 #### 1.5.0
 * Redesign total to float at the bottom left of the page for easier viewing
