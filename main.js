@@ -20,9 +20,6 @@ const selectFrom = ($el, ...selectors) => {
 // matched.
 const selectFirstFrom = (...args) => selectFrom(...args)[0] || null;
 
-// Same as `#selectFirstFrom` on the entire document.
-const selectFirst = selectFirstFrom.bind(null, document);
-
 // Escapes the given string for direct use as HTML. The result is _not_ suitable
 // for use in script tags or style blocks!
 const escapeHTML = (s) => (s || '').replace(/[<>"]/g, (c) => {
@@ -295,56 +292,9 @@ const parsePage = ($page) => {
   });
 };
 
-// Given an array of wish list pages, parses the items out of each of them and
-// returns a JSON object representing the overall wish list.
-const parseWishList = ($pages) => {
-  const items = [];
-  for (const $page of $pages) {
-    items.push.apply(items, parsePage($page));
-  }
-  return items;
-};
-
-// Download all available pages for the given wish list and return a Promise
-// that fulfills with an array of HTML document elements, or rejects with an
-// error.
-const fetchWishListPages = (id, $pages = []) => {
-  // Fetch the next page and add it to our list. If we have no pages yet, the
-  // "next" page is the very first one! When we're done fetching all the pages,
-  // return a Promise for an array of HTML document objects, each representing a
-  // fetched page.
-  const url = `/gp/registry/wishlist/${id}?page=${$pages.length + 1}`;
-  return fetch(url).then((res) => res.text()).then((responseText) => {
-    // Parse the downloaded data into a document and add it to our accumulated
-    // pages list.
-    const $page = document.implementation.createHTMLDocument();
-    $page.documentElement.innerHTML = responseText;
-    $pages.push($page);
-
-    // If we have another page to download (i.e. we have an accessible "Next"
-    // link), continue, otherwise return.
-    const $nextPage = selectFirstFrom($page, '#wishlistPagination .a-last:not(.a-disabled) a');
-    if ($nextPage) {
-      return fetchWishListPages(id, $pages);
-    } else {
-      return $pages;
-    }
-  });
-};
-
 // Add the given items to our wish list database, overwriting any existing ones.
 const updateDatabaseFromItems = (database, items) => {
   items.forEach((item) => { database.set(item.id, item); });
-};
-
-// Given a wish list id, downloads all its pages, parses the items, adds them to
-// the global database, then returns a Promise that fulfills once the process is
-// complete.
-const updateDatabaseFromAPI = (database, id) => {
-  return fetchWishListPages(id).then(($pages) => {
-    const items = parseWishList($pages);
-    updateDatabaseFromItems(database, items);
-  });
 };
 
 // Build and return a single DOM element for our whole application.
@@ -421,17 +371,6 @@ const renderIntoRootFromDatabase = ($root, database, previousHash = null) => {
   return currentHash;
 };
 
-// Finds the id of the currently-viewed wish list and returns it as a string.
-const getCurrentWishListId = () => {
-  // Amazon stores the state of this page in a convenient JSON blob we can
-  // access to get the id!
-  const $state = selectFirst('script[type="a-state"][data-a-state*="navState"]');
-  if (!$state) { return null; }
-
-  const json = JSON.parse($state.textContent);
-  return json.linkArgs.id;
-};
-
 //
 // MAIN
 //
@@ -453,20 +392,13 @@ const getCurrentWishListId = () => {
   // _actually_ hashed, it will force a render and replace the loading message.
   let databaseHash = null;
 
-  // Populate the items database with an initial full download. Once we've
-  // finished the initial download, start doing screen-scrape updates too.
-  updateDatabaseFromAPI(database, getCurrentWishListId()).then(() => {
-    // Continuously check the current page for user changes to add to the
-    // database.
-    setInterval(() => {
-      const items = parsePage(document.documentElement);
-      updateDatabaseFromItems(database, items);
+  // Continuously check the current page for user changes to add to the
+  // database.
+  setInterval(() => {
+    const items = parsePage(document.documentElement);
+    updateDatabaseFromItems(database, items);
 
-      // Update the hash to reflect what was just rendered.
-      databaseHash = renderIntoRootFromDatabase($root, database, databaseHash);
-    }, 100);
-
-    // Periodically do an update from the API in case other pages have changed.
-    setInterval(() => updateDatabaseFromAPI(database, getCurrentWishListId()), 10 * 1000);
-  });
+    // Update the hash to reflect what was just rendered.
+    databaseHash = renderIntoRootFromDatabase($root, database, databaseHash);
+  }, 100);
 })();
