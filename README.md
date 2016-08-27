@@ -3,22 +3,47 @@
 Amazon Wish List Total
 ======================
 
-A Google Chrome extension that totals up the price of all items in the current
-Amazon wish list, and displays it unobtrusively on the left side of the screen.
+A Google Chrome extension that keeps a running total of all the items its seen
+in the current Amazon wish list, and displays it unobtrusively on the left side
+of the screen.
 
 ![Screenshot](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/images/screenshot.png)
 
 Description
 ----
-Ever get tired of having to manually total up the items in your wish list, click
-a button to figure out how much it all costs, or add all the items to the cart
-to get that one magic number?
+This extension aims to make your life a bit easier by tracking all the items
+it's seen within any of your Amazon wish lists, then displaying an unobtrusive
+running total price at the bottom left of your screen.
 
-Worry no more! This extension adds an unobtrusive total price to the left side of
-the screen, and updates it dynamically when items are added or deleted.
+Once upon a time, this extension displayed the _full_ total for the entire list
+you were on by by making several requests to Amazon's servers for the wish list
+data, then parsing them and summing everything up. Sadly, in August 2016, Amazon
+made that exceedingly difficult, if not impossible, and I had to remove the
+feature.
+
+Luckily, single-page lists are unaffected since all the data is available on the
+current page! However, to see the full total for your multi-page wish list, you
+now have manually page through the entire list. This is still better than
+manually adding everything up yourself, but clearly isn't ideal. I know, I know:
+I miss the old way too!
+
+If you have any suggestions (or better yet, code) for how to programmatically
+determine the full total for a wish list, I'd love to hear about it!
 
 Changelog
 ----
+#### 1.7.0
+* Amazon disabled the method we were using to determine the full wish list total
+  automatically, so now you can only initially see the total for the page you're
+  looking at.
+
+  The work around is to manually page through the entire list. The extension
+  will still correctly determine the total when you do this, but we can't do it
+  automatically anymore :(
+
+  I'm as sad about this as you are, believe me! I tried to find a way around
+  this, but either there isn't one or I just couldn't find it. Sorry!
+
 #### 1.6.2
 * Ensure empty lists show a zero total, not a perpetual loading message
 
