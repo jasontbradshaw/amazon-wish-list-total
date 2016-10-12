@@ -1,7 +1,7 @@
 {
   "name": "Amazon Wish List Total",
   "short_name": "Wish List Total",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "manifest_version": 2,
 
   "description": "Keeps a running total of all the items it's seen in the current Amazon wish list.",

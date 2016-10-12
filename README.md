@@ -32,6 +32,10 @@ determine the full total for a wish list, I'd love to hear about it!
 
 Changelog
 ----
+#### 1.7.1
+* Prevent the total from obscuring the rest of the page during printing (thanks,
+  @supertinyrobot!)
+
 #### 1.7.0
 * Amazon disabled the method we were using to determine the full wish list total
   automatically, so now you can only initially see the total for the page you're
