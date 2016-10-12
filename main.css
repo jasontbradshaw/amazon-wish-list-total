@@ -3,6 +3,13 @@
   to { opacity: 1; }
 }
 
+/* Hide the list while printing so it never covers anything up. */
+@media print {
+  #wishlist-total {
+    display: none;
+  }
+}
+
 /* Used when the total is loading to prevent a jarring "pop" when it appears. */
 .animation-fade-in {
   animation: fade-in 150ms;
