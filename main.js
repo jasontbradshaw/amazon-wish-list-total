@@ -231,8 +231,21 @@ const parseItem = ($item) => {
   // your list.
   let isBlackedOut = false;
   if ($editLink) {
-    const data = JSON.parse($editLink.dataset.regDispatchModal);
-    isBlackedOut = Boolean(data.data.showBlackoutMsg);
+    try {
+      const data = JSON.parse(
+        // Typically, data exists in this attribute.
+        $editLink.dataset.regDispatchModal ||
+
+        // NOTE: This doesn't show up for me, but apparently it replaces
+        // `reg-dispatch-modal` data for some people. Hence, we fall back to it
+        // if the former doesn't exist!
+        $editLink.dataset.aModal
+      );
+
+      isBlackedOut = Boolean(data.data.showBlackoutMsg);
+    } catch (e) {
+      // Fall back to ignoring this feature if we can't parse the data.
+    }
   }
 
   // This will deal nicely with parsing values that have a range, like "$29.95 -
