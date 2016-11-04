@@ -32,6 +32,10 @@ determine the full total for a wish list, I'd love to hear about it!
 
 Changelog
 ----
+#### 1.7.2
+* Prevent the total from obscuring the rest of the page during printing (thanks
+  to @Shakathesaint and J. Hobbs for helping me track this down!)
+
 #### 1.7.1
 * Prevent the total from obscuring the rest of the page during printing (thanks,
   @supertinyrobot!)
