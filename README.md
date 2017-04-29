@@ -15,23 +15,15 @@ This extension aims to make your life a bit easier by tracking all the items
 it's seen within any of your Amazon wish lists, then displaying an unobtrusive
 running total price at the bottom left of your screen.
 
-Once upon a time, this extension displayed the _full_ total for the entire list
-you were on by by making several requests to Amazon's servers for the wish list
-data, then parsing them and summing everything up. Sadly, in August 2016, Amazon
-made that exceedingly difficult, if not impossible, and I had to remove the
-feature.
-
-Luckily, single-page lists are unaffected since all the data is available on the
-current page! However, to see the full total for your multi-page wish list, you
-now have manually page through the entire list. This is still better than
-manually adding everything up yourself, but clearly isn't ideal. I know, I know:
-I miss the old way too!
-
-If you have any suggestions (or better yet, code) for how to programmatically
-determine the full total for a wish list, I'd love to hear about it!
+To see the total for your _entire_ list, you'll need to scroll to the very
+bottom of it so all the items will load!
 
 Changelog
 ----
+#### 1.7.3
+* Add support for new infinite-scrolling wish lists (needs new URL permissions
+  to work on the new list URLs at `/hz/wishlist`).
+
 #### 1.7.2
 * Fix the perpetual "Calulating total..." bug (thanks to @Shakathesaint and J.
   Hobbs for helping me track this down!)
