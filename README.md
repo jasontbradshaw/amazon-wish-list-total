@@ -18,7 +18,7 @@ running total price at the bottom left of your screen.
 To see the total for your _entire_ list, you'll need to scroll to the very
 bottom of it so all the items will load!
 
-Changelog
+Change Log
 ----
 #### 1.7.3
 * Add support for new infinite-scrolling wish lists (needs new URL permissions
