@@ -1,4 +1,5 @@
-[![Chrome Web Store Badge](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/images/badge.png)](https://chrome.google.com/webstore/detail/amazon-wish-list-total/boekbkconiendicldakeboooeilaldmh)
+[![Chrome Web Store Badge](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/images/badge-chrome.png)](https://chrome.google.com/webstore/detail/amazon-wish-list-total/boekbkconiendicldakeboooeilaldmh)
+[![Firefox Add-on Badge](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/images/badge-firefox.png)](https://addons.mozilla.org/en-US/firefox/addon/amazon_wish_list_total/)
 
 Amazon Wish List Total
 ======================
