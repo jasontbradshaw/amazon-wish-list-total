@@ -32,6 +32,27 @@
   border: 1px solid #dddddd;
 }
 
+/* Reduce padding when somewhat narrow. */
+@media (max-width: 1024px) {
+  #wishlist-total {
+    bottom: 10px;
+    left: 10px;
+  }
+}
+
+/* Take up the entire bottom of the screen when very narrow. */
+@media (max-width: 400px) {
+  #wishlist-total {
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+  }
+}
+
 #wishlist-total .total-text {
   font-style: italic;
 }
