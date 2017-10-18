@@ -4,9 +4,8 @@
 Amazon Wish List Total
 ======================
 
-A Google Chrome extension that keeps a running total of all the items its seen
-in the current Amazon wish list, and displays it unobtrusively on the left side
-of the screen.
+An extension that keeps a running total of all the items its seen in the current
+Amazon wish list, and displays it unobtrusively on the left side of the screen.
 
 ![Screenshot](https://raw.githubusercontent.com/jasontbradshaw/amazon-wish-list-total/master/images/screenshot.png)
 
