@@ -32,6 +32,42 @@
   border: 1px solid #dddddd;
 }
 
+/* Only display the spinner while the result is actually loading. */
+#wishlist-total         .spinner { display: none; }
+#wishlist-total.loading .spinner { display: inline-block; }
+
+/* The loading spinner displayed until all list items have been loaded. */
+.spinner {
+  display: inline-block;
+
+  width: 1.2em;
+  height: 1.2em;
+
+  vertical-align: text-bottom;
+  margin-left: 0.25em;
+}
+
+/* Reduce padding when somewhat narrow. */
+@media (max-width: 1024px) {
+  #wishlist-total {
+    bottom: 10px;
+    left: 10px;
+  }
+}
+
+/* Take up the entire bottom of the screen when very narrow. */
+@media (max-width: 400px) {
+  #wishlist-total {
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+  }
+}
+
 #wishlist-total .total-text {
   font-style: italic;
 }

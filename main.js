@@ -106,12 +106,10 @@ const valOrText = ($el) => { return $el.value || $el.innerText; };
 // different text in the application.
 const LOCALE = (() => {
   const englishTemplate = Object.freeze({
-    loading_text: 'Calculating wish list total…',
     subtotal_text: (n) => `Subtotal (${n} item${(n === 1 ? '' : 's')})`,
   });
 
   const spanishTemplate = Object.freeze({
-    loading_text: 'Cálculo lista de artículos deseados total de…',
     subtotal_text: (n) => `Subtotal (${n} producto${(n === 1 ? '' : 's')})`,
   });
 
@@ -153,43 +151,36 @@ const LOCALE = (() => {
     // OTHER
     '.cn': {
       currency_code: 'CNY',
-      loading_text: '计算愿望清单总…',
       subtotal_text: (n) => `小计 (${n} 件商品)`,
     },
 
     '.co.jp': {
       currency_code: 'JPY',
-      loading_text: 'ウィッシュリスト合計を計算…',
       subtotal_text: (n) => `小計 (${n} 商品)`,
     },
 
     '.com.br': {
       currency_code: 'BRL',
-      loading_text: 'Calculando lista de desejos total de…',
       subtotal_text: (n) => `Subtotal (${n} iten${(n === 1 ? '' : 's')})`,
     },
 
     '.de': {
       currency_code: 'EUR',
-      loading_text: 'Berechnung Wunschzettel insgesamt…',
       subtotal_text: (n) => `Summe (${n} Artikel)`,
     },
 
     '.fr': {
       currency_code: 'EUR',
-      loading_text: 'Calcul liste de souhaits totale…',
       subtotal_text: (n) => `Sous-total (${n} article${(n === 1 ? '' : 's')}))`,
     },
 
     '.it': {
       currency_code: 'EUR',
-      loading_text: 'Calcolo lista dei desideri totale…',
       subtotal_text: (n) => `Totale provvisorio (${n} articol${(n === 1 ? 'o' : 'i')})`,
     },
 
     '.nl': {
       currency_code: 'EUR',
-      loading_text: 'Berekenen wens lijst totaal…',
       subtotal_text: (n) => `Summe (${n} Artikel)`,
     },
   };
@@ -214,14 +205,14 @@ const parseItem = ($item) => {
   const id = $item.id.split('_')[1];
 
   const $name = selectFirstFrom($item, '[id^="itemName_"]', '.g-title a');
-  const $want = selectFirstFrom($item, '[id^="itemRequested_"]', '[name^="requestedQty"]');
-  const $have = selectFirstFrom($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]');
+  const $want = selectFirstFrom($item, '[id^="itemRequested_"]', '[name^="requestedQty"]', '[id^="item-quantity-requested_"]');
+  const $have = selectFirstFrom($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]', '[id^="item-quantity-purchased_"]');
   const $editLink = selectFirstFrom($item, '[id^="itemEditLabel_"]');
 
   // If the item isn't available, attempt to use the "Used & New" price.
   let $price = selectFirstFrom($item, '[id^="itemPrice_"]');
   if (!$price || !$price.innerText.trim()) {
-    $price = selectFirstFrom($item, '.itemUsedAndNewPrice');
+    $price = selectFirstFrom($item, '.itemUsedAndNewPrice', '[id^="used-and-new_"] span:first-of-type');
   }
 
   let itemName = '';
@@ -297,7 +288,7 @@ const parseItem = ($item) => {
 // array of individual JSON wish list items.
 const parsePage = ($page) => {
   // Parse all items into an array of JSON objects.
-  return selectFrom($page, '.g-items-section [id^="item_"]').map(($item) => {
+  return selectFrom($page, '.g-items-section [id^="item_"]', '#awl-list-items [id^="itemWrapper_"').map(($item) => {
     // Deleted items get parsed as having no price, which effectively deletes
     // them from the database (a useful thing so we don't have to do a real
     // delete).
@@ -316,30 +307,33 @@ const render = (attrs = {}) => {
   // to match.
   const elementId = 'wishlist-total';
 
-  let $price;
-  if (attrs.loading) {
-    $price = DOM`
-      <div id="${elementId}" class="animation-fade-in">
-        <i>${LOCALE.loading_text}</i>
-      </div>
-    `;
-  } else {
-    // Format the total price as the locale dictates.
-    const localeTotal = attrs.total_price.toLocaleString(undefined, {
-      style: 'currency',
-      currency: LOCALE.currency_code,
-      currencyDisplay: 'symbol',
-    });
+  // Format the total price as the locale dictates.
+  const localeTotal = attrs.total_price.toLocaleString(undefined, {
+    style: 'currency',
+    currency: LOCALE.currency_code,
+    currencyDisplay: 'symbol',
+  });
 
-    $price = DOM`
-      <div id="${elementId}">
-        <span class="total-text">${LOCALE.subtotal_text(attrs.total_count)}</span>:
-        <span class="total-price a-color-price">
-          ${localeTotal}
-        </span>
-      </div>
-    `;
+  // Show the loading spinner until we're done loading all the wish list items.
+  let loadingClass = '';
+  if (attrs.loading) {
+    loadingClass = 'loading';
   }
+
+  const $price = DOM`
+    <div id="${elementId}" class="${loadingClass}">
+      <span class="total-text">${LOCALE.subtotal_text(attrs.total_count)}</span>:
+      <span class="total-price a-color-price">
+        ${localeTotal}
+      </span>
+
+      <svg class="spinner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+        <circle cx="50" cy="50" fill="none" stroke-linecap="round" r="40" stroke-width="10" stroke="#dddddd" stroke-dasharray="62.83185307179586 62.83185307179586">
+          <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform>
+        </circle>
+      </svg>
+    </div>
+  `;
 
   return $price[0];
 };
@@ -371,14 +365,15 @@ const hashDatbaseForRendering = (database) => {
 // Re-render into `$root` only if the hash has changed since the last render.
 // Returns the new hash of the given database as calculated by
 // `#hashDatbaseForRendering`.
-const renderIntoRootFromDatabase = ($root, database, previousHash = null) => {
+const renderIntoRootFromDatabase = ($root, allItemsLoaded, database, previousHash = null) => {
   // Render our items into the DOM, assuming it still exists!
-  const totals = calculateItemTotals(database.values());
+  const attrs = calculateItemTotals(database.values());
+  attrs.loading = !allItemsLoaded;
 
   // If the hash has changed since the last rendering, we need to re-render.
-  const currentHash = hashDatbaseForRendering(database);
+  const currentHash = hashDatbaseForRendering(database) + allItemsLoaded;
   if (currentHash !== previousHash) {
-    $root.innerHTML = render(totals).outerHTML;
+    $root.innerHTML = render(attrs).outerHTML;
   }
 
   return currentHash;
@@ -391,10 +386,6 @@ const renderIntoRootFromDatabase = ($root, database, previousHash = null) => {
 (() => {
   // Build our root element, the one we'll render everything in to.
   const $root = document.body.appendChild(document.createElement('div'));
-
-  // Do an initial render of a loading message. This will be replaced once we
-  // successfully calculate the totals.
-  $root.appendChild(render({ loading: true }));
 
   // The database of items we're currently displaying. This is used so we can
   // poll the current page for changes instead of having to scrape the entire
@@ -411,7 +402,20 @@ const renderIntoRootFromDatabase = ($root, database, previousHash = null) => {
     const items = parsePage(document.documentElement);
     updateDatabaseFromItems(database, items);
 
+    // Once we find the "end of list" marker element, this means that the page
+    // won't be loading anymore elements and we can consider ourselves "loaded".
+    const allItemsLoaded = Boolean(selectFirstFrom(
+      document.documentElement,
+      '#endOfListMarker',
+      '#no-items-section-anywhere'
+    ));
+
     // Update the hash to reflect what was just rendered.
-    databaseHash = renderIntoRootFromDatabase($root, database, databaseHash);
+    databaseHash = renderIntoRootFromDatabase(
+      $root,
+      allItemsLoaded,
+      database,
+      databaseHash
+    );
   }, 100);
 })();
