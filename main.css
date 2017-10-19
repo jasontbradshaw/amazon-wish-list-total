@@ -32,6 +32,21 @@
   border: 1px solid #dddddd;
 }
 
+/* Only display the spinner while the result is actually loading. */
+#wishlist-total         .spinner { display: none; }
+#wishlist-total.loading .spinner { display: inline-block; }
+
+/* The loading spinner displayed until all list items have been loaded. */
+.spinner {
+  display: inline-block;
+
+  width: 1.2em;
+  height: 1.2em;
+
+  vertical-align: text-bottom;
+  margin-left: 0.25em;
+}
+
 /* Reduce padding when somewhat narrow. */
 @media (max-width: 1024px) {
   #wishlist-total {
