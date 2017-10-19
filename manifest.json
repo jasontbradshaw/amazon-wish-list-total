@@ -11,7 +11,6 @@
       "matches": [
         "*://*.amazon.ca/gp/registry/*",
         "*://*.amazon.cn/gp/registry/*",
-        "*://*.amazon.cn/hz/wishlist/*",
         "*://*.amazon.co.jp/gp/registry/*",
         "*://*.amazon.co.uk/gp/registry/*",
         "*://*.amazon.com.au/gp/registry/*",
@@ -25,7 +24,9 @@
         "*://*.amazon.it/gp/registry/*",
         "*://*.amazon.nl/gp/registry/*",
         "*://*.z.cn/gp/registry/*",
+
         "*://*.amazon.ca/hz/wishlist/*",
+        "*://*.amazon.cn/hz/wishlist/*",
         "*://*.amazon.co.jp/hz/wishlist/*",
         "*://*.amazon.co.uk/hz/wishlist/*",
         "*://*.amazon.com.au/hz/wishlist/*",
@@ -38,7 +39,24 @@
         "*://*.amazon.in/hz/wishlist/*",
         "*://*.amazon.it/hz/wishlist/*",
         "*://*.amazon.nl/hz/wishlist/*",
-        "*://*.z.cn/hz/wishlist/*"
+        "*://*.z.cn/hz/wishlist/*",
+
+        "*://*.amazon.ca/gp/aw/ls/*",
+        "*://*.amazon.cn/gp/aw/ls/*",
+        "*://*.amazon.cn/hz/wishlist/*",
+        "*://*.amazon.co.jp/gp/aw/ls/*",
+        "*://*.amazon.co.uk/gp/aw/ls/*",
+        "*://*.amazon.com.au/gp/aw/ls/*",
+        "*://*.amazon.com.br/gp/aw/ls/*",
+        "*://*.amazon.com.mx/gp/aw/ls/*",
+        "*://*.amazon.com/gp/aw/ls/*",
+        "*://*.amazon.de/gp/aw/ls/*",
+        "*://*.amazon.es/gp/aw/ls/*",
+        "*://*.amazon.fr/gp/aw/ls/*",
+        "*://*.amazon.in/gp/aw/ls/*",
+        "*://*.amazon.it/gp/aw/ls/*",
+        "*://*.amazon.nl/gp/aw/ls/*",
+        "*://*.z.cn/gp/aw/ls/*"
       ],
       "js": [ "main.js" ],
       "css": [ "main.css" ],

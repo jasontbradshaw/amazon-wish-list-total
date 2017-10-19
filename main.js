@@ -214,14 +214,14 @@ const parseItem = ($item) => {
   const id = $item.id.split('_')[1];
 
   const $name = selectFirstFrom($item, '[id^="itemName_"]', '.g-title a');
-  const $want = selectFirstFrom($item, '[id^="itemRequested_"]', '[name^="requestedQty"]');
-  const $have = selectFirstFrom($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]');
+  const $want = selectFirstFrom($item, '[id^="itemRequested_"]', '[name^="requestedQty"]', '[id^="item-quantity-requested_"]');
+  const $have = selectFirstFrom($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]', '[id^="item-quantity-purchased_"]');
   const $editLink = selectFirstFrom($item, '[id^="itemEditLabel_"]');
 
   // If the item isn't available, attempt to use the "Used & New" price.
   let $price = selectFirstFrom($item, '[id^="itemPrice_"]');
   if (!$price || !$price.innerText.trim()) {
-    $price = selectFirstFrom($item, '.itemUsedAndNewPrice');
+    $price = selectFirstFrom($item, '.itemUsedAndNewPrice', '[id^="used-and-new_"] span:first-of-type');
   }
 
   let itemName = '';
@@ -297,7 +297,7 @@ const parseItem = ($item) => {
 // array of individual JSON wish list items.
 const parsePage = ($page) => {
   // Parse all items into an array of JSON objects.
-  return selectFrom($page, '.g-items-section [id^="item_"]').map(($item) => {
+  return selectFrom($page, '.g-items-section [id^="item_"]', '#awl-list-items [id^="itemWrapper_"').map(($item) => {
     // Deleted items get parsed as having no price, which effectively deletes
     // them from the database (a useful thing so we don't have to do a real
     // delete).
