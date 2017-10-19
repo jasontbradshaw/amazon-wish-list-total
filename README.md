@@ -20,6 +20,13 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.8.0
+* Support smaller screens by changing the style to conserve space when a smaller
+  screen is detected.
+* Support Firefox for Android!
+* Show a loading spinner until all items in the current list have been parsed
+  and added to the total.
+
 #### 1.7.3
 * Add support for new infinite-scrolling wish lists (needs new URL permissions
   to work on the new list URLs at `/hz/wishlist`).
