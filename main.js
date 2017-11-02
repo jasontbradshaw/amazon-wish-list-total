@@ -396,9 +396,18 @@ const renderIntoRootFromDatabase = ($root, allItemsLoaded, database, previousHas
   // _actually_ hashed, it will force a render and replace the loading message.
   let databaseHash = null;
 
-  // Continuously check the current page for user changes to add to the
-  // database.
-  setInterval(() => {
+  // The longest/shortest times to go between attempting to detect new items.
+  const MAX_TIMEOUT_MS = 5000;
+  const MIN_TIMEOUT_MS = 100;
+
+  // The current amount of time to wait between polls.
+  let curTimeoutMs = MIN_TIMEOUT_MS;
+
+  // Reduce the current timeout to its minimum value.
+  const resetCurTimeout = () => { curTimeoutMs = MIN_TIMEOUT_MS; };
+
+  // Poll the page for changes and update the database/its hash with the result.
+  const poll = () => {
     const items = parsePage(document.documentElement);
     updateDatabaseFromItems(database, items);
 
@@ -417,5 +426,29 @@ const renderIntoRootFromDatabase = ($root, allItemsLoaded, database, previousHas
       database,
       databaseHash
     );
-  }, 100);
+
+    // Increase the timeout length. If the user is actively interacting with the
+    // page, this will get reduced by one of our event listeners. Otherwise,
+    // it'll grow up to the maximum value.
+    curTimeoutMs = Math.min(MAX_TIMEOUT_MS, curTimeoutMs * 1.25);
+  };
+
+  // Every time the user interacts with the page, reduce the timeout to the
+  // minimum. This ensures we'll catch whatever they're doing without too much
+  // delay.
+  document.documentElement.addEventListener('mousemove', resetCurTimeout, false);
+  document.documentElement.addEventListener('touchstart', resetCurTimeout, false);
+
+  // Continuously check the current page for user changes to add to the
+  // database, backing off when no changes are found.
+  const timeout = () => {
+    try {
+      poll();
+    } finally {
+      // Ensure we don't fail out of our loop for any reason, and will always
+      // try again.
+      setTimeout(timeout, curTimeoutMs);
+    }
+  };
+  timeout();
 })();
