@@ -20,6 +20,9 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.9.0
+* Reduce resource usage.
+
 #### 1.8.0
 * Support smaller screens by changing the style to conserve space when a smaller
   screen is detected.
