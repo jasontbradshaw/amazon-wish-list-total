@@ -20,6 +20,9 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.9.2
+* Fix bug where un-deleted items weren't being included in the total.
+
 #### 1.9.1
 * Reduce resource usage even more!
 
