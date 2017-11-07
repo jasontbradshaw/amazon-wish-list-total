@@ -262,8 +262,13 @@ const parseItem = ($item) => {
   let need = Math.max(0, want - have);
 
   // Set all counts to zero if the item has been deleted. This means the totals
-  // we get will be 0, meaning the item won't affect overall calculations.
-  if ($item.closest('.g-item-sortable-removed')) {
+  // we get will be 0, meaning the item won't affect overall calculations. We
+  // have to do some extra "filtering" in order to detect items that have
+  // _actually_ been deleted, since Amazon fails to remove the
+  // `.g-item-sortable-removed` class after an item has been un-deleted.
+  if ($item.closest('.g-item-sortable-removed') &&
+      $item.querySelector('.a-alert-content') &&
+      $item.querySelector('.a-alert-content').textContent.match(/deleted/i)) {
     want = 0;
     have = 0;
     need = 0;
