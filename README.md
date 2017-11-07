@@ -20,6 +20,9 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.9.1
+* Reduce resource usage even more!
+
 #### 1.9.0
 * Reduce resource usage.
 
