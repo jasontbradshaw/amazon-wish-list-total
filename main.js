@@ -394,20 +394,23 @@ const renderIntoRootFromDatabase = ($root, allItemsLoaded, database, previousHas
 
   // We set this to `null` explicitly so that the first time the database is
   // _actually_ hashed, it will force a render and replace the loading message.
-  let databaseHash = null;
+  let DATABASE_HASH = null;
 
-  // The longest/shortest times to go between attempting to detect new items.
-  const MAX_TIMEOUT_MS = 5000;
-  const MIN_TIMEOUT_MS = 100;
+  // The last time the DOM changed in any way.
+  let LAST_CHANGE_TIME = 0;
 
-  // The current amount of time to wait between polls.
-  let curTimeoutMs = MIN_TIMEOUT_MS;
+  // The interval that parses the page and looks for changes. If no DOM changes
+  // happen within a short timeout, this cancels itself to save resources.
+  let LAST_CHANGE_INTERVAL = null;
 
-  // Reduce the current timeout to its minimum value.
-  const resetCurTimeout = () => { curTimeoutMs = MIN_TIMEOUT_MS; };
+  // The number of milliseconds between update polls, and the amount of time to
+  // wait before canceling the update poller interval.
+  const updateIntervalMS = 250;
 
-  // Poll the page for changes and update the database/its hash with the result.
-  const poll = () => {
+  // Check the current page for user changes to add to the database. If no DOM
+  // change has been detected in a while, cancel the interval that re-parses the
+  // page.
+  const update = () => {
     const items = parsePage(document.documentElement);
     updateDatabaseFromItems(database, items);
 
@@ -420,35 +423,39 @@ const renderIntoRootFromDatabase = ($root, allItemsLoaded, database, previousHas
     ));
 
     // Update the hash to reflect what was just rendered.
-    databaseHash = renderIntoRootFromDatabase(
+    DATABASE_HASH = renderIntoRootFromDatabase(
       $root,
       allItemsLoaded,
       database,
-      databaseHash
+      DATABASE_HASH
     );
 
-    // Increase the timeout length. If the user is actively interacting with the
-    // page, this will get reduced by one of our event listeners. Otherwise,
-    // it'll grow up to the maximum value.
-    curTimeoutMs = Math.min(MAX_TIMEOUT_MS, curTimeoutMs * 1.25);
-  };
-
-  // Every time the user interacts with the page, reduce the timeout to the
-  // minimum. This ensures we'll catch whatever they're doing without too much
-  // delay.
-  document.documentElement.addEventListener('mousemove', resetCurTimeout, false);
-  document.documentElement.addEventListener('touchstart', resetCurTimeout, false);
-
-  // Continuously check the current page for user changes to add to the
-  // database, backing off when no changes are found.
-  const timeout = () => {
-    try {
-      poll();
-    } finally {
-      // Ensure we don't fail out of our loop for any reason, and will always
-      // try again.
-      setTimeout(timeout, curTimeoutMs);
+    // If it's been too long without an update, cancel this interval.
+    if (Date.now() > LAST_CHANGE_TIME + updateIntervalMS) {
+      clearInterval(LAST_CHANGE_INTERVAL);
+      LAST_CHANGE_INTERVAL = null;
     }
   };
-  timeout();
+
+  new MutationObserver(() => {
+    // Mark the last time we observed a change so `#update()` can know how long
+    // it's been since the most recent change.
+    LAST_CHANGE_TIME = Date.now();
+
+    // Restart the debounced update interval if it cancelled itself.
+    if (!LAST_CHANGE_INTERVAL) {
+      // Also trigger on the "leading edge" for maximum responsiveness.
+      update();
+      LAST_CHANGE_INTERVAL = setInterval(update, updateIntervalMS);
+    }
+  }).observe(document.documentElement, {
+    attributes: true,
+    childList: true,
+    characterData: true,
+    subtree: true,
+  });
+
+  // Kick off the initial update event to ensure that we capture all possible
+  // page state without having to wait for the DOM to change.
+  update();
 })();
