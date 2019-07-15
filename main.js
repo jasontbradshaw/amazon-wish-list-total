@@ -415,7 +415,16 @@ const calculateItemTotals = (items) => {
 // database meaningfully changes.
 const hashDatbaseForRendering = (database) => {
   const totals = calculateItemTotals(database.values());
-  return (totals.total_count * 31) + (totals.total_price * 7);
+
+  const priorityHash = Object.keys(totals.priorities).reduce((hash, priority) => {
+    let sum = 0;
+    for (let i = 0; i < priority.length; i++) {
+      sum += priority.charCodeAt(i);
+    }
+    return sum + hash;
+  }, 0);
+
+  return (priorityHash * 53) + (totals.total_count * 31) + (totals.total_price * 7);
 };
 
 // Re-render into `$root` only if the hash has changed since the last render.
