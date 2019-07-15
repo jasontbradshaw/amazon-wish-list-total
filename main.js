@@ -219,7 +219,7 @@ const parseItem = ($item) => {
   let itemName = '';
   if ($name) { itemName = $name.innerText.trim(); }
 
-  let priority = 'medium';
+  let priority = '';
   if ($priority) {
     priority = $priority.innerText.trim();
     priority = priority.charAt(0).toUpperCase() + priority.slice(1);
@@ -348,33 +348,36 @@ const render = (attrs = {}) => {
     </div>
   `;
 
-  const priorities = Object
-    .entries(attrs.priorities)
-    .sort(([_, aVal], [__, bVal]) => bVal.price - aVal.price); // Sort by price high to low
+  let priorities = Object.entries(attrs.priorities);
 
-  if (priorities.length > 0) {
-    const $priorityHeader = DOM`<div class="wishlist-spacer" />`;
+  // Only show priorities if there is more than one
+  if (priorities.length > 1) {
+    priorities = priorities.sort(([_, aVal], [__, bVal]) => bVal.price - aVal.price); // Sort by price high to low
 
-    $price[0].appendChild($priorityHeader[0]);
-  }
+    if (priorities.length > 0) {
+      const $priorityHeader = DOM`<div class="wishlist-spacer" />`;
 
-  for (const [priority, values] of priorities) {
-    const priorityTotal = values.price.toLocaleString(undefined, {
-      style: 'currency',
-      currency: LOCALE.currency_code,
-      currencyDisplay: 'symbol',
-    });
+      $price[0].appendChild($priorityHeader[0]);
+    }
 
-    const subTotalText = LOCALE.subtotal_text(values.count);
+    for (const [priority, values] of priorities) {
+      const priorityTotal = values.price.toLocaleString(undefined, {
+        style: 'currency',
+        currency: LOCALE.currency_code,
+        currencyDisplay: 'symbol',
+      });
 
-    const $priority = DOM`
-      <div class="priority-item">
-        <span class="total-text">${priority} (${subTotalText.split(' (')[1]}</span>
-        <span class="total-price a-color-price">${priorityTotal}</span>
-      </div>
-    `;
+      const subTotalText = LOCALE.subtotal_text(values.count);
 
-    $price[0].appendChild($priority[0]);
+      const $priority = DOM`
+        <div class="priority-item">
+          <span class="total-text">${priority} (${subTotalText.split(' (')[1]}</span>
+          <span class="total-price a-color-price">${priorityTotal}</span>
+        </div>
+      `;
+
+      $price[0].appendChild($priority[0]);
+    }
   }
 
   return $price[0];
@@ -385,6 +388,7 @@ const calculateItemTotals = (items) => {
   let totalCount = 0;
   let totalPrice = 0;
   let priorities = {};
+
   for (const item of items) {
     // Only count items that we found a price for, i.e. that were available on
     // Amazon and not just from other retailers.
@@ -392,14 +396,12 @@ const calculateItemTotals = (items) => {
     totalCount = totalCount + itemCount;
     totalPrice = totalPrice + item.total_price;
 
-    if (item.priority) {
-      if (!priorities[item.priority]) {
-        priorities[item.priority] = { count: 0, price: 0 };
-      }
-
-      priorities[item.priority].count += itemCount;
-      priorities[item.priority].price += item.total_price;
+    if (!priorities[item.priority]) {
+      priorities[item.priority] = { count: 0, price: 0 };
     }
+
+    priorities[item.priority].count += itemCount;
+    priorities[item.priority].price += item.total_price;
   }
 
   return {
