@@ -71,3 +71,14 @@
 #wishlist-total .total-text {
   font-style: italic;
 }
+
+.wishlist-spacer {
+  width: 100px;
+  height: 1px;
+  margin: 8px auto 5px;
+  background-color: #dddddd;
+}
+
+.priority-item {
+  margin-top: 3px;
+}

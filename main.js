@@ -208,6 +208,7 @@ const parseItem = ($item) => {
   const $want = selectFirstFrom($item, '[id^="itemRequested_"]', '[name^="requestedQty"]', '[id^="item-quantity-requested_"]');
   const $have = selectFirstFrom($item, '[id^="itemPurchased_"]', '[name^="purchasedQty"]', '[id^="item-quantity-purchased_"]');
   const $editLink = selectFirstFrom($item, '[id^="itemEditLabel_"]');
+  const $priority = selectFirstFrom($item, '[id^="itemPriorityLabel_"]');
 
   // If the item isn't available, attempt to use the "Used & New" price.
   let $price = selectFirstFrom($item, '[id^="itemPrice_"]');
@@ -217,6 +218,12 @@ const parseItem = ($item) => {
 
   let itemName = '';
   if ($name) { itemName = $name.innerText.trim(); }
+
+  let priority = 'medium';
+  if ($priority) {
+    priority = $priority.innerText.trim();
+    priority = priority.charAt(0).toUpperCase() + priority.slice(1);
+  }
 
   // Items are "blacked-out" if someone bought them for you, but they remain on
   // your list.
@@ -277,6 +284,7 @@ const parseItem = ($item) => {
   return {
     id: id,
     name: itemName,
+    priority: priority,
 
     counts: {
       have: have,
@@ -340,6 +348,35 @@ const render = (attrs = {}) => {
     </div>
   `;
 
+  const priorities = Object
+    .entries(attrs.priorities)
+    .sort(([_, aVal], [__, bVal]) => bVal.price - aVal.price); // Sort by price high to low
+
+  if (priorities.length > 0) {
+    const $priorityHeader = DOM`<div class="wishlist-spacer" />`;
+
+    $price[0].appendChild($priorityHeader[0]);
+  }
+
+  for (const [priority, values] of priorities) {
+    const priorityTotal = values.price.toLocaleString(undefined, {
+      style: 'currency',
+      currency: LOCALE.currency_code,
+      currencyDisplay: 'symbol',
+    });
+
+    const subTotalText = LOCALE.subtotal_text(values.count);
+
+    const $priority = DOM`
+      <div class="priority-item">
+        <span class="total-text">${priority} (${subTotalText.split(' (')[1]}</span>
+        <span class="total-price a-color-price">${priorityTotal}</span>
+      </div>
+    `;
+
+    $price[0].appendChild($priority[0]);
+  }
+
   return $price[0];
 };
 
@@ -347,16 +384,28 @@ const render = (attrs = {}) => {
 const calculateItemTotals = (items) => {
   let totalCount = 0;
   let totalPrice = 0;
+  let priorities = {};
   for (const item of items) {
     // Only count items that we found a price for, i.e. that were available on
     // Amazon and not just from other retailers.
-    totalCount = totalCount + (item.price ? item.counts.need : 0);
+    const itemCount = item.price ? item.counts.need : 0;
+    totalCount = totalCount + itemCount;
     totalPrice = totalPrice + item.total_price;
+
+    if (item.priority) {
+      if (!priorities[item.priority]) {
+        priorities[item.priority] = { count: 0, price: 0 };
+      }
+
+      priorities[item.priority].count += itemCount;
+      priorities[item.priority].price += item.total_price;
+    }
   }
 
   return {
     total_count: totalCount,
     total_price: totalPrice,
+    priorities: priorities,
   };
 };
 
