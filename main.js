@@ -293,7 +293,7 @@ const parseItem = ($item) => {
 // array of individual JSON wish list items.
 const parsePage = ($page) => {
   // Parse all items into an array of JSON objects.
-  return selectFrom($page, '.g-items-section [id^="item_"]', '#awl-list-items [id^="itemWrapper_"').map(($item) => {
+  return selectFrom($page, '.g-items-section [id^="itemMain_"]', '.g-items-section [id^="item_"]', '#awl-list-items [id^="itemWrapper_"').map(($item) => {
     // Deleted items get parsed as having no price, which effectively deletes
     // them from the database (a useful thing so we don't have to do a real
     // delete).
