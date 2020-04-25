@@ -20,6 +20,10 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.9.3
+* Recognize items on (at least) https://www.amazon.de again (thanks
+  @MorbidDevil!)
+
 #### 1.9.2
 * Fix bug where un-deleted items weren't being included in the total.
 
