@@ -65,6 +65,7 @@ const parseCurrency = (s) => {
   s = (s || '')
       .replace(/[^0-9.,\s]+/g, '')
       .replace(/\s+/g, ' ')
+      .replace(/(\d)\s\.\s(\d)/g, '$1.$2')
       .trim();
 
   // Get all the possible numbers in the string.
