@@ -59,7 +59,7 @@ const DOM = (strings, ...values) => {
 // fraction, we normalize the number to a decimal fraction first. If multiple
 // currency values are included in the string, an average of all of them is
 // returned.
-const parseCurrency = (s) => {
+const parseCurrency = (s, currency_code) => {
   // Pare down our string to include only digits, commas, periods, and single
   // literal spaces instead of multiple whitespace characters.
   s = (s || '')
@@ -76,7 +76,7 @@ const parseCurrency = (s) => {
     const commaSeparated = part.replace(/[^.,]+/g, '').endsWith(',');
 
     // If it's comma-separated, normalize it to a decimal number.
-    if (commaSeparated) {
+    if (commaSeparated && currency_code != 'JPY') {
       // Turns '1.234,56' into '1234.56'.
       const commaParts = part.split(',');
       part = commaParts[0].replace(/\./g, '') + '.' + commaParts[1];
@@ -247,7 +247,7 @@ const parseItem = ($item) => {
   // 0.
   let price = 0;
   if ($price && /\d/.test($price.innerText)) {
-    price = parseCurrency($price.innerText);
+    price = parseCurrency($price.innerText, LOCALE.currency_code);
   }
 
   // Luckily, these show up in the HTML even when not visible on the page!
