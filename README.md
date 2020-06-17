@@ -20,6 +20,9 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.9.5
+* Correct calculation of amounts on amazon.co.jp (thanks @itok01!)
+
 #### 1.9.4
 * Fix 0 items/NaN total (thanks @MorbidDevil!)
 
