@@ -65,7 +65,7 @@ const parseCurrency = (s, currency_code) => {
   s = (s || '')
       .replace(/[^0-9.,\s]+/g, '')
       .replace(/\s+/g, ' ')
-      .replace(/(\d)\s\.\s(\d)/g, '$1.$2')
+      .replace(/(\d)\s\.\s(\d)/g, '$1.$2') // Handle amazon.co.uk correctly.
       .trim();
 
   // Get all the possible numbers in the string.
@@ -77,6 +77,10 @@ const parseCurrency = (s, currency_code) => {
     const commaSeparated = part.replace(/[^.,]+/g, '').endsWith(',');
 
     // If it's comma-separated, normalize it to a decimal number.
+    //
+    // JPY, unlike our other supported currencies, doesn't use decimal places
+    // (Yen are typically displayed only as whole numbers) and displays as e.g.
+    // `123,456`; we skip its normalization to get the correct value.
     if (commaSeparated && currency_code != 'JPY') {
       // Turns '1.234,56' into '1234.56'.
       const commaParts = part.split(',');
