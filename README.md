@@ -20,6 +20,9 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.9.4
+* Fix 0 items/NaN total (thanks @MorbidDevil!)
+
 #### 1.9.3
 * Recognize items on (at least) https://www.amazon.de again (thanks
   @MorbidDevil!)
