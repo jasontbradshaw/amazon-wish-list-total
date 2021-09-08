@@ -188,6 +188,16 @@ const LOCALE = (() => {
       currency_code: 'EUR',
       subtotal_text: (n) => `Summe (${n} Artikel)`,
     },
+
+    '.com.tr': {
+      currency_code: 'TRY',
+      subtotal_text: (n) => `Ara toplam (${n} ürün)`,
+    },
+
+    '.se': {
+      currency_code: 'SEK',
+      subtotal_text: (n) => `Delsumma (${n} ${(n === 1 ? 'artikel' : 'artiklar')})`,
+    },
   };
 
   // Return the first localization data that matches our domain ending.
