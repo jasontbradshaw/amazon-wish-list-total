@@ -20,6 +20,10 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.10.0
+* Add support for Turkey and Sweden (thanks @fuzzymannerz!)
+* Fix `.de` and `.se` English language URLs (thanks @fuzzymannerz!)
+
 #### 1.9.5
 * Correct calculation of amounts on amazon.co.jp (thanks @itok01!)
 
