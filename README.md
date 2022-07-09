@@ -20,6 +20,9 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.10.1
+* Fix the total not being calculated in grid mode
+
 #### 1.10.0
 * Add support for Turkey and Sweden (thanks @fuzzymannerz!)
 * Fix `.de` and `.se` English language URLs (thanks @fuzzymannerz!)
