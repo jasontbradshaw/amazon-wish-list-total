@@ -120,6 +120,10 @@ const LOCALE = (() => {
 
   const localizationData = {
     // ENGLISH
+    '.ae': Object.assign({
+      currency_code: 'AED',
+    }, englishTemplate),
+
     '.ca': Object.assign({
       currency_code: 'CAD',
     }, englishTemplate),
