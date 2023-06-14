@@ -9,6 +9,7 @@
   "content_scripts": [
     {
       "matches": [
+        "*://*.amazon.ae/gp/registry/*",
         "*://*.amazon.ca/gp/registry/*",
         "*://*.amazon.cn/gp/registry/*",
         "*://*.amazon.co.jp/gp/registry/*",
@@ -27,6 +28,7 @@
         "*://*.amazon.se/gp/registry/*",
         "*://*.z.cn/gp/registry/*",
 
+        "*://*.amazon.ae/hz/wishlist/*",
         "*://*.amazon.ca/hz/wishlist/*",
         "*://*.amazon.cn/hz/wishlist/*",
         "*://*.amazon.co.jp/hz/wishlist/*",
@@ -45,6 +47,7 @@
         "*://*.amazon.se/*hz/wishlist/*",
         "*://*.z.cn/hz/wishlist/*",
 
+        "*://*.amazon.ae/gp/aw/ls/*",
         "*://*.amazon.ca/gp/aw/ls/*",
         "*://*.amazon.cn/gp/aw/ls/*",
         "*://*.amazon.co.jp/gp/aw/ls/*",
