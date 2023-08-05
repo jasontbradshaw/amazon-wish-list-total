@@ -20,6 +20,9 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.11.0
+* Add support for amazon.ae (thanks @alike010000!)
+
 #### 1.10.1
 * Fix the total not being calculated in grid mode
 
