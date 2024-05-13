@@ -2,9 +2,16 @@
   "name": "Amazon Wish List Total",
   "short_name": "Wish List Total",
   "version": "1.11.0",
-  "manifest_version": 2,
+  "manifest_version": 3,
 
   "description": "Keeps a running total of all the items it's seen in the current Amazon wish list.",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{41d3acac-3680-4864-861c-48f690c49477}",
+      "strict_min_version": "109.0"
+    }
+  },
 
   "content_scripts": [
     {
