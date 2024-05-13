@@ -20,6 +20,9 @@ bottom of it so all the items will load!
 
 Change Log
 ----
+#### 1.11.1
+* Migrate to manifest V3
+
 #### 1.11.0
 * Add support for amazon.ae (thanks @alike010000!)
 
